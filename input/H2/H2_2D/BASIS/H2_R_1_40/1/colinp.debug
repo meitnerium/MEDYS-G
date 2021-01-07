@@ -1,0 +1,2 @@
+INC=/opt/Col70_2015_bin/Columbus/CPAN /opt/Col70_2015_bin/Columbus/perlscripts /etc/perl /usr/local/lib64/perl5/5.20.2/x86_64-linux /usr/local/lib64/perl5/5.20.2 /usr/lib64/perl5/vendor_perl/5.20.2/x86_64-linux /usr/lib64/perl5/vendor_perl/5.20.2 /usr/local/lib64/perl5 /usr/lib64/perl5/vendor_perl/5.20.1/x86_64-linux /usr/lib64/perl5/vendor_perl/5.20.1 /usr/lib64/perl5/vendor_perl /usr/lib64/perl5/5.20.2/x86_64-linux /usr/lib64/perl5/5.20.2 .
+Perlversion:5.020002
