@@ -759,6 +759,19 @@ Complex(kind=comp_16)  	:: temp,temp2,prefact,capB,zetC,Im_u
 Real(kind=real_8)    		:: z1Mod,z1Phase,z2Mod,z2Phase,zCMod,zCPhase,a
 integer			              :: k,kp,ksum, k1,k2,k3,k4,p,pp,pmax,ppmax
 
+OPEN(UNIT=88, FILE='output.data',Access = 'append')
+write(88,*) 'zet1 ',zet1
+write(88,*) 'zet2 ',zet2
+write(88,*) 'R1 ', R1
+write(88,*) 'R2 ', R2
+write(88,*) 'l1 ', l1
+write(88,*) 'l2 ', l2
+write(88,*) 'v1 ', v1
+write(88,*) 'v2 ', v2
+write(88,*) 'dlt ', dlt
+write(88,*) 'alpha ', alpha
+write(88,*) 'Anl ', Anl
+
 Im_u=dcmplx(0.d0, 1.d0)	!Def. found in Module basics : Real(kind=real_8),parameter :: pio2=pi/2.0_real_8
 
  
@@ -818,6 +831,10 @@ do k=0,pmax
         res=res+temp*temp2
     enddo
 enddo
+write(88,*) 'RES = '
+write(88,*) res
+write(88,*) '**********************************************'
+close(UNIT=88)
 
 end subroutine Get_GMut1DG
 !***************************************************
