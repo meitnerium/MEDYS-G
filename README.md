@@ -3,8 +3,9 @@ Multielectronic dynamic software (MEDYS) is a code for calculation of electron d
 
 To compile the code, the following command must be executed:
 
-- aclocal 
--  automake --add-missing
+- aclocal
+- mkdir build-aux 
+- automake --add-missing
 - autoconf
 - ./configure
 - make
