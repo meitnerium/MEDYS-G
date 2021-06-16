@@ -776,7 +776,7 @@ case default
 a=1/(2.d0*dlt*pdt)
 zetC=dcmplx(zet2,a)
 z2Mod=abs(zetC)
-z2Phase=-atan2(dimag(zetC),dreal(zetC))
+z2Phase=atan2(dimag(zetC),dreal(zetC))
 rho=Im_u*a*zetC/z2Mod**2
 zetC=  -Im_u*a*(1.d0+rho)+ zet1 ! - Im_u*a+ (a**2)zetC/z2Mod**2+zet1
 pmax=l2
@@ -787,7 +787,7 @@ end select
 
 zCMod=abs(zetC)
 zCPhase=atan2(dimag(zetC),dreal(zetC)) !todo : verifier atan ou atan2
-capB=-dcmplx(zet2*(R2-R1 +alpha) , -Anl/2.d0)*cdexp(dcmplx(0.d0,-zCPhase))/zCMod !todo: a verifier
+capB=-dcmplx(zet1*(R2-R1 +alpha) , -Anl/2.d0)*cdexp(dcmplx(0.d0,-zCPhase))/zCMod !todo: a verifier
 prefact=cdexp(zetC*capB*capB)*prefact
 prefact=cdexp(-zet1*(dcmplx((alpha + R2-R1)*(alpha + R2-R1), 0.d0)))*prefact
 
@@ -818,7 +818,7 @@ do k=0,pmax
         res=res+temp*temp2
     enddo
 enddo
-
+res = prefact*res
 end subroutine Get_GMut1DG
 !***************************************************
 !***************************************************
