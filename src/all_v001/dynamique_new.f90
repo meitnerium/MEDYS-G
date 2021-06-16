@@ -789,7 +789,7 @@ case default
 a=1/(2.d0*dlt*pdt)
 zetC=dcmplx(zet2,a)
 z2Mod=abs(zetC)
-z2Phase=-atan2(dimag(zetC),dreal(zetC))
+z2Phase=atan2(dimag(zetC),dreal(zetC))
 rho=Im_u*a*zetC/z2Mod**2
 zetC=  -Im_u*a*(1.d0+rho)+ zet1 ! - Im_u*a+ (a**2)zetC/z2Mod**2+zet1
 pmax=l2
@@ -800,9 +800,11 @@ end select
 
 zCMod=abs(zetC)
 zCPhase=atan2(dimag(zetC),dreal(zetC)) !todo : verifier atan ou atan2
-capB=-dcmplx(zet2*(R2-R1 +alpha) , -Anl/2.d0)*cdexp(dcmplx(0.d0,-zCPhase))/zCMod !todo: a verifier
+capB=-dcmplx(zet1*(R2-R1 +alpha) , -Anl/2.d0)*cdexp(dcmplx(0.d0,-zCPhase))/zCMod !todo: a verifier
+write(*,*) "capB",capB
 prefact=cdexp(zetC*capB*capB)*prefact
 prefact=cdexp(-zet1*(dcmplx((alpha + R2-R1)*(alpha + R2-R1), 0.d0)))*prefact
+write(*,*) "prefact",prefact
 
 
 temp=dcmplx(1.d0,0.d0)
@@ -823,6 +825,7 @@ do k=0,pmax
                         ksum=k1+k2+k3+k4
                         if(Mod(ksum,2).eq.0) then
                             temp2=temp2+comb(l1,k1)*comb(v1,k2)*comb(pmax-k,k3)*comb(ppmax-kp,k4)*(rho**(pmax-k+k4))*((capB+R2-R1+alpha)**(l1-k1))*((capB+R2+alpha)**(v1-k2))*(capB**(pmax-k-k3))*((R2-rho*capB)**(ppmax-kp-k4))*(fact(ksum-1,2)/(dsqrt(2.d0)**ksum) )*(dsqrt(zCMod))**(-(ksum+1))*cdexp(dcmplx(0.d0,-0.5d0*zCPhase*(ksum+1)))
+                           write(*,*) "temp2 = ", temp2, "res = ", res
                         endif
                     enddo
                 enddo
@@ -831,6 +834,7 @@ do k=0,pmax
         res=res+temp*temp2
     enddo
 enddo
+res = prefact*res
 write(88,*) 'RES = '
 write(88,*) res
 write(88,*) '**********************************************'
