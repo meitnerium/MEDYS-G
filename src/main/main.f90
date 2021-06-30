@@ -163,7 +163,7 @@ input_name='input'
 open(49,file='status.dat',status='replace',form='formatted')
 write(49,*) "running"
 close(49)
-call param_debut(basis_file,nq,inR,Ne,Norb_cat,Norb_sym,FC,restriction,S,job,ni,imin,imax,di,&
+call param_debut(basis_file,nq,inR,Ne,Norb_cat,Norb_sym,FC,restriction,S,job,ni,imin,imax,di,dki,kmin,&
 E0,omega,delta,theta,phy,pulsed,nper,pdt,tmin,nt,QCsoft,lp,ld,Iflg1,Iflg2)
 !  subroutine param_debut(basis_file,nq,inR,Ne,Norb_cat,Norb_sym,FC,restriction,S,job,ni,imin,imax,di,E0&
 !,omega,delta,theta,phy,pulsed,nper,pdt,tmin,nt,QCsoft,lp,ld)
@@ -617,6 +617,9 @@ do j=1,dimP
 !        open(110+j,file="spectre2dx_canal"// ADJUSTL(nom2) //".dat",status='replace',form='formatted')
 end do
 write(*,*) "dimP = ",dimP
+write(*,*) "nki(1) = ",nki(1)
+write(*,*) "nki(2) = ",nki(2)
+write(*,*) "nki(3) = ",nki(3)
 do i=1,nki(1)
 	kvec(1)=(i-1)*dki(1)+kmin(1)
 	do j=1,nki(2)

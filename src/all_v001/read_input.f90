@@ -8,7 +8,7 @@ use basics
 contains
 !****************************************************************************************
 !****************************************************************************************
- subroutine param_debut(basis_file,nq,inR,Ne,Norb_cat,Norb_sym,FC,restriction,S,job,ni,imin,imax,di,E0&
+ subroutine param_debut(basis_file,nq,inR,Ne,Norb_cat,Norb_sym,FC,restriction,S,job,ni,imin,imax,di,dki,kmin,E0&
 ,omega,delta,theta,phy,pulsed,nper,pdt,tmin,nt,QCsoft,lp,ld,Iflg1,Iflg2)
 !****************************************************************************************
 !****************************************************************************************
@@ -36,9 +36,9 @@ implicit none
  Real(kind=real_8) 			                        :: tmax
  Real(kind=real_8)			                        :: pdt,version
 !TODO : verifier ces trois parametres
- Integer(kind=int_4), Dimension(3)	:: ni
- Real(kind=real_8), Dimension(3)	  :: imin,imax,di  !,dki,kmin
- Real(kind=real_8), Dimension(3)	  :: dki,kmin
+ Integer(kind=int_4), Dimension(3), Intent(out)	:: ni
+ Real(kind=real_8), Dimension(3), Intent(out)	  :: imin,imax,di  !,dki,kmin
+ Real(kind=real_8), Dimension(3), Intent(out)	  :: dki,kmin
 
 Namelist/grille/basis_file,nq,inR,job,QCsoft
  Namelist/planewaves/nx,xmin,ny,ymin,nz,zmin 
@@ -59,7 +59,13 @@ read(1,nml=control_flags)
  close(1)
 basis_file=trim(basis_file)
 omega=omega/dfloat(harmonic)
+ni(1) = nx
 if (nx .eq. 1)then
+        imin(1) = 0.d0
+        imax(1) = 0.d0
+        di(1) = 0.d0
+        dki(1) = 0.d0
+        kmin(1) = 0.d0
 	xmin=0.d0
 	xmax=0.d0
 	dx=0.d0
@@ -68,14 +74,25 @@ if (nx .eq. 1)then
 else if (nx .lt. 1)then
 	STOP 'nx is wrong in the input'
 else
+        imin(1) = xmin
+        imax(1) = -xmin
+        di(1) = 2.d0*dabs(xmin)/dfloat(nx-1)
 	xmax=-xmin
 	dx=2.d0*dabs(xmin)/dfloat(nx-1)
+        dki(1) = (2.d0*pi)/(dfloat(nx)*dx)
+        kmin(1) = -pi/dx
 	dkx=(2.d0*pi)/(dfloat(nx)*dx)
 	kxmin=-pi/dx
 
 endif
 
+ni(2) = ny
 if (ny .eq. 1)then
+        imin(2) = 0.d0
+        imax(2) = 0.d0
+        di(2) = 0.d0
+        dki(2) = 0.d0
+        kmin(2) = 0.d0
 	ymax=0.d0
 	ymin=0.d0
 	dy=0.d0
@@ -84,23 +101,40 @@ if (ny .eq. 1)then
 else if (ny .lt. 1)then
 	STOP 'ny is wrong, check the input'
 else
+        imin(2) = ymin
+        imax(2) = -ymin
+        di(2) = 2.d0*dabs(ymin)/dfloat(ny-1)
 	ymax=-ymin
 	dy=2.d0*dabs(ymin)/dfloat(ny-1)
+        dki(2) = (2.d0*pi)/(dfloat(ny)*dy)
+        kmin(2) = -pi/dy
 	dky=(2.d0*pi)/(dfloat(ny)*dy)
 	kymin=-pi/dy
 endif
 
+ni(3) = nz
 if (nz .eq. 1)then
+        imin(3) = 0.d0
+        imax(3) = 0.d0
+        di(3) = 0.d0
+        dki(3) = 0.d0
+        kmin(3) = 0.d0
 	zmax=0.d0
 	zmin=0.d0
 	dz=0.d0
 	dkz=0.d0
+	dki(3)=0.d0
 	kzmin=0.d0
 else if (nz .lt. 1)then
 	STOP 'nz is wrong, check the input'
 else
+        imin(3) = zmin
+        imax(3) = -zmin
+        di(3) = 2.d0*dabs(zmin)/dfloat(nz-1)
 	zmax=-zmin
 	dz=2.d0*dabs(zmin)/dfloat(nz-1)
+        dki(3) = (2.d0*pi)/(dfloat(nz)*dz)
+        kmin(3) = -pi/dz
 	dkz=(2.d0*pi)/(dfloat(nz)*dz)
 	kzmin=-pi/dz
 
