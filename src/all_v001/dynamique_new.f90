@@ -782,6 +782,7 @@ select case(dlt)
 case(0)
 a=0.d0
 zetC=dcmplx(zet1+zet2,0.d0)
+write(*,*) "zetC", zetC
 rho=dcmplx(1.d0,0.0)
 pmax=0
 ppmax=0
