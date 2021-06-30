@@ -46,6 +46,7 @@ implicit none
  Integer:: i,j,k,l,w,x,y,z
  Integer(kind=int_4) 					:: norb_lect,inR,nq,orb_min,orb_max,maxprim
  Character(len=32) 					:: sortie, nom
+ Character(len=5) 					:: nom2
  Logical 						:: prop,ortho,opw
 
 !for final storage of 1e, 2e integrals (over active+FC orbitals only)
@@ -605,15 +606,17 @@ call new_dyna(fctQ,fctP,Upp,muEPS,muEPS_Sq,sauvChamp,matA,eps,cEta,cZeta,&
 lmn_vec,prim_center,lcCG,Ers,H0qq,H0pp,MUqq,MUpp) !,matAlpha,matPhi
  
 !    Write e-momentum spectra for each ionic channel if requested (iflg2=1). Others possible value of iflg2 are 0 (no spectrum generated), 2= spectra generated for selected J (to be done). Those are presently unavailable.
-select case(iflg2)
+write(*,*) "Iflg2", Iflg2
+select case(Iflg2)
 
 case (1)
 
 do j=1,dimP
-         write (nom,'(I5.5)') j
-         open(110+j,file="spectre_k_canal"// ADJUSTL(nom) //".dat",status='replace',form='formatted') ! attention: numéro d'unité dépassant 100 
-!        open(110+j,file="spectre2dx_canal"// ADJUSTL(nom) //".dat",status='replace',form='formatted')
+         write (nom2,'(I5.5)') j
+         open(110+j,file="spectre_k_canal"// ADJUSTL(nom2) //".dat",status='replace',form='formatted') ! attention: numéro d'unité dépassant 100 
+!        open(110+j,file="spectre2dx_canal"// ADJUSTL(nom2) //".dat",status='replace',form='formatted')
 end do
+write(*,*) "dimP = ",dimP
 do i=1,nki(1)
 	kvec(1)=(i-1)*dki(1)+kmin(1)
 	do j=1,nki(2)

@@ -30,7 +30,7 @@ theta= 0.0d0		!Angle from the Z axis to polarisation(units of pi)
 phy= 0.0d0		!Angle between sin(theta) and the X axis(units of pi)
 pulsed= .TRUE.		!The form of the pulse
 nper= 3			!Number of optic cycles
-pdt= 1000		!Number of timesteps per optic cycle 
+pdt= 10		!Number of timesteps per optic cycle 
 tmin=0.d0		!Initial time
 harmonic=1
 /

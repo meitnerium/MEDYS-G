@@ -35,8 +35,9 @@ implicit none
  Real(kind=real_8), Intent(out) 	              :: S,E0,tmin
  Real(kind=real_8) 			                        :: tmax
  Real(kind=real_8)			                        :: pdt,version
- Integer(kind=int_4), Dimension(3),Intent(out)	:: ni
- Real(kind=real_8), Dimension(3),Intent(out)	  :: imin,imax,di  !,dki,kmin
+!TODO : verifier ces trois parametres
+ Integer(kind=int_4), Dimension(3)	:: ni
+ Real(kind=real_8), Dimension(3)	  :: imin,imax,di  !,dki,kmin
  Real(kind=real_8), Dimension(3)	  :: dki,kmin
 
 Namelist/grille/basis_file,nq,inR,job,QCsoft
@@ -54,6 +55,7 @@ read(1,nml=grille)
 read(1,nml=drt)
 read(1,nml=champ)
 read(1,nml=prim_spec)
+read(1,nml=control_flags)
  close(1)
 basis_file=trim(basis_file)
 omega=omega/dfloat(harmonic)
