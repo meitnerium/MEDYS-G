@@ -62,6 +62,7 @@ Real(kind=real_8)					::PropStart,PropEnd,TotalProp
 Real(kind=real_8)					::TotalCI,TotalGamma,TotalVolk
 Real(kind=real_8),Dimension(3)				::sauvkmin
 Real(kind=real_8)	        			::t1,t2
+    Character(len=5)                    ::nom
 write(*,*)'Debut dynamique'
 
 sauvChamp=0.d0
@@ -79,6 +80,14 @@ call Volkov_OM(1,1,lcCG,matA,eps,cEta,cZeta,lmn_vec,prim_center,muEPS,muEPS_Sq)!
 call Hqppq_CSF(muEPS_Sq,Ers,Hqppq) 
 
 call cpu_time ( t1 )
+
+     do j=1,dimP
+        write (nom,'(I5.5)') j
+        open(900+j,file="Proba_ionisation_canal"// ADJUSTL(nom) //".dat",status='replace',form='formatted')
+!        open(110+j,file="spectre2dx_canal"// ADJUSTL(nom) //".dat",status='replace',form='formatted')
+        close(900+j)
+    end do
+
 
 do tn=1,nt  ! begin time-loop
 t=tn
@@ -367,9 +376,10 @@ call Get_Observable_P_I(Upp,fctP,muEPS_Sq,Volkov_OM_mat,matA,P_J_Ion_amplitude,t
 !    open(52,file='PSomme.dat',status='replace',form='formatted')
      do j=1,dimP
         write (nom,'(I5.5)') j
-        open(900+j,file="Proba_ionisation_canal"// ADJUSTL(nom) //".dat",status='replace',form='formatted')
+        open(900+j,file="Proba_ionisation_canal"// ADJUSTL(nom) //".dat",status='old',form='formatted')
 !        open(110+j,file="spectre2dx_canal"// ADJUSTL(nom) //".dat",status='replace',form='formatted')
         write(900+j,'(3X,I5.2,3X,F10.5,3X,ES24.14)')  tn+1, (tn+1)*delta, cdabs(P_J_Ion_amplitude(j))**2
+        write(*,'(3X,I5.2,3X,F10.5,3X,ES24.14)')  tn+1, (tn+1)*delta, cdabs(P_J_Ion_amplitude(j))**2
         close(900+j)
     end do
 
@@ -854,6 +864,7 @@ Complex(kind=comp_16)  	::  ztemp
 P_J_Ion_amplitude=dcmplx(0.d0,0.d0)
 if(t_idx.ge.2) then
   do j=1,dimP
+     write(*,*) j,"/",dimP, "( in Get_Observable_P_I)"
      do r=1,orb_Q
         do s=1,orb_Q
            do tnn=2, t_idx-1
@@ -910,6 +921,7 @@ ek_Amp=dcmplx(0.d0,0.d0)
 
 if(tn.ge.2)then
     do tnn=2,tn
+
         !call Get_Anl_Alpha_Phi(matA,tn,tnn,A_nl,Alpha_nl,Phi_nl)
         call emomentum_from_MO(tn-tnn,A_nl,Alpha_nl,Phi_nl,eps,cZeta ,lmn_vec ,prim_center,lcCG,muEPS,kvec,gamm2)
         temp=fctP(:,:,tnn)
@@ -957,6 +969,7 @@ BigGamma1=dcmplx(0.d0,0.d0)
 BigGamma2=dcmplx(0.d0,0.d0)
 
 do i_prim=1,totPrimCount
+     write(*,*) i_prim,"/",totPrimCount, "( in emomentum_from_MO)"
 
 lmn_p=lmn_vec(i,:)
     do j=1,3

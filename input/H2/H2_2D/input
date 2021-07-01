@@ -23,7 +23,7 @@ S= 0.d0			!Total spin of the system
 restriction=.TRUE.	!Restrict to single ionisation
 /
 &champ
-E0= 1.6d-2		!Laser intensity(a.u.)
+E0= 1.6d-1		!Laser intensity(a.u.)
 omega= 0.55		!Laser frequency(a.u.) 
 delta= 1.5E+000		!Laser phase(units of pi)
 theta= 0.0d0		!Angle from the Z axis to polarisation(units of pi)
