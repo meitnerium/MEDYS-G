@@ -973,6 +973,7 @@ do i_prim=1,totPrimCount
 
 lmn_p=lmn_vec(i,:)
     do j=1,3
+       write(*,*) j,"/3 (j in emomentum_from_MO)"
        select case(j)
        case(1)
         lmn_p(1)=lmn_p(1)+1
@@ -982,6 +983,7 @@ lmn_p=lmn_vec(i,:)
         lmn_p(3)=lmn_p(3)+1
        end select 
        
+       write(*,*) "call of uvolkov_on_CG ( in emomentum_from_MO)"
        call uvolkov_on_CG(Anl,Alpha_nl, Phi_nl,cZeta(i_prim),lmn_p,prim_center(i_prim,:), eps,kvec,it, BigGamma1(i_prim))
        BigGamma1(i_prim)=eps(j)*BigGamma1(i_prim)/dsqrt(4.d0*cZeta(i_prim))
     enddo
@@ -1022,6 +1024,7 @@ integer						                       :: n,nn,i,j
 nn=0
 res=dcmplx(1.d0,0.d0)
 do i=1,3 
+write(*,*) i,"/3 (i in uvolkov_on_CG)"
 Atemp=Anl*eps(i)
 Alpha_temp=Alpha_nl*eps(i)
 k_transl=veck(i)-Atemp
@@ -1032,6 +1035,7 @@ n=lmn(i)
 res= res*Hermite(k_transl/dsqrt(4.d0*zet),n )*cdexp( -k_transl*k_transl*( dcmplx(1.d0/(4.d0*zet), -Dtime*pdt/2.d0) ))
 res=res*cdexp(dcmplx(0.d0, R_transl*k_transl))
 nn=nn+n
+write(*,*) 'end of loop on uvolkov_on_CG'
 enddo
 
 res=res*cdexp(dcmplx(0.d0,-pio2*nn-Phi_nl))/(dsqrt(dsqrt(twopi*zet)))**3  ! e^(-i pi/2) =-i
