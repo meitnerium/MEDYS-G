@@ -589,7 +589,7 @@ Real(kind=real_8),  Dimension(:,:,:,:),Intent(in) 	:: Ers
 complex(kind=comp_16),allocatable,dimension(:,:)     :: gamm2 !CI1,CI2,CI3,CI4,CI5,CI
 complex(kind=comp_16), dimension(:,:),Intent(inout)   ::muEPS_r_gam !,gammCorrection
 complex(kind=comp_16), dimension(:,:,:,:),Intent(inout)	   ::Volkov_OM_mat
-complex(kind=comp_16), dimension(dimP)	   ::temp
+complex(kind=comp_16), dimension(dimP)	   ::temp, temp2
 integer						                       :: nn,j,r,s,tnn
 
 allocate(gamm2(orb_Q,orb_Q))
@@ -603,7 +603,8 @@ do r=1,orb_Q
     temp=fctP(:,s,tnn)  
       if(tnn.lt.tn)then
       do nn=tnn,tn-1
-       call gemv(Upp(nn,:,:),temp,temp)
+       call gemv(Upp(nn,:,:),temp,temp2)
+       temp = temp2
       end do
      endif
   muEPS_r_gam(r,j)=muEPS_r_gam(r,j)+temp(j)*matA(tnn-1)*Volkov_OM_mat(tn,tnn-1,r,s)
@@ -858,7 +859,7 @@ Complex(kind=comp_16), Dimension(:,:),Intent(in) 	::  muEPS_Sq
 Complex(kind=comp_16), Dimension(:) 	::  P_J_Ion_amplitude
 Integer(kind=int_4), Intent(in)::t_idx
 Integer(kind=int_4)  ::nn,r,s,tnn,tnp
-Complex(kind=comp_16), Dimension(dimP) 	::  temp,temp2
+Complex(kind=comp_16), Dimension(dimP) 	::  temp,temp2,tempr,tempr2
 Complex(kind=comp_16)  	::  ztemp 
 
 P_J_Ion_amplitude=dcmplx(0.d0,0.d0)
@@ -873,10 +874,12 @@ if(t_idx.ge.2) then
                    temp=fctP(:,r,tnn)
                    temp2=fctP(:,s,tnp)
                    do nn=tnn,tn-1
-                      call gemv(Upp(nn,:,:),temp,temp) !todo: a separer en 2 lignes et pleins d'autres!!!
+                      call gemv(Upp(nn,:,:),temp,tempr) !todo: a separer en 2 lignes et pleins d'autres!!!
+                      temp = tempr
                    enddo
                    do nn=tnp,tn-1
-                      call gemv(Upp(nn,:,:),temp2,temp2)
+                      call gemv(Upp(nn,:,:),temp2,tempr2)
+                      temp2 = tempr2
                    enddo
                  endif
                ztemp=matA(tnp)*matA(tnn)*conjg(temp(j))*temp2(j)*Volkov_OM_mat(tnn,tnp,r,s)  !  matA(tnp-1,tnp-1)*matA(tnn-1,tnn-1)  ????
@@ -1032,7 +1035,9 @@ R_transl=Rc(i)+Alpha_temp
 
 n=lmn(i)
 
+write(*,*) 'before calc of res'
 res= res*Hermite(k_transl/dsqrt(4.d0*zet),n )*cdexp( -k_transl*k_transl*( dcmplx(1.d0/(4.d0*zet), -Dtime*pdt/2.d0) ))
+write(*,*) 'before calc of res second line'
 res=res*cdexp(dcmplx(0.d0, R_transl*k_transl))
 nn=nn+n
 write(*,*) 'end of loop on uvolkov_on_CG'
@@ -1064,12 +1069,12 @@ integer   :: i
 
     if(n.le.10)then
      do i = 0, n  
+        write(*,*) "i=",i,"/",n,"in Hermite)"
         Hermite=Hermite+ A(i)*(kk**i)  
      end do 
     else
       write(*,*) 'error: n too large' 
     endif
-   stop
 end function
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -1081,12 +1086,13 @@ Subroutine Hermite_Coeff(n,A)
   integer i,j,n
 real(kind=real_8), dimension(10), intent(inout) :: A
 real(kind=real_8), dimension(10,10)   :: B
-
+  write(*,*) "Begining of Hermite_Coeff"
   !Establish l0 and l1 coefficients
   B(0,0)=1.d0 ; B(1,0)=0.d0 ; B(1,1)=2.d0
   !Return if order is less than two
   if (n>1) then
     do i = 2, n
+      write(*,*) "i = ",i,"/",n,"(in Hermite_Coeff)"
       B(i,0)=-2.d0*(i-1)*B(i-2,0)
       do j = 1, i
         !Basic recursion relation
