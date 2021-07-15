@@ -85,7 +85,7 @@ call cpu_time ( t1 )
         write (nom,'(I5.5)') j
         open(900+j,file="Proba_ionisation_canal"// ADJUSTL(nom) //".dat",status='replace',form='formatted')
 !        open(110+j,file="spectre2dx_canal"// ADJUSTL(nom) //".dat",status='replace',form='formatted')
-        close(900+j)
+        !close(900+j)
     end do
 
 
@@ -115,6 +115,11 @@ matA,eps,cEta,cZeta,lmn_vec,prim_center,lcCG,Ers) ! ,matAlpha,matPhi
 ! 
 	write(51,*)tmin+(tn*pdt),Int0(),sauvChamp(tn+1)
 end do  ! end of time-loop
+
+     do j=1,dimP
+        close(900+j)
+    end do
+
 
 
 end subroutine new_dyna
@@ -376,11 +381,11 @@ call Get_Observable_P_I(Upp,fctP,muEPS_Sq,Volkov_OM_mat,matA,P_J_Ion_amplitude,t
 !    open(52,file='PSomme.dat',status='replace',form='formatted')
      do j=1,dimP
         write (nom,'(I5.5)') j
-        open(900+j,file="Proba_ionisation_canal"// ADJUSTL(nom) //".dat",status='old',form='formatted')
+        !open(900+j,file="Proba_ionisation_canal"// ADJUSTL(nom) //".dat",status='old',form='formatted')
 !        open(110+j,file="spectre2dx_canal"// ADJUSTL(nom) //".dat",status='replace',form='formatted')
         write(900+j,'(3X,I5.2,3X,F10.5,3X,ES24.14)')  tn+1, (tn+1)*delta, cdabs(P_J_Ion_amplitude(j))**2
         write(*,'(3X,I5.2,3X,F10.5,3X,ES24.14)')  tn+1, (tn+1)*delta, cdabs(P_J_Ion_amplitude(j))**2
-        close(900+j)
+        !close(900+j)
     end do
 
         !do j=1,dimP
@@ -972,11 +977,11 @@ BigGamma1=dcmplx(0.d0,0.d0)
 BigGamma2=dcmplx(0.d0,0.d0)
 
 do i_prim=1,totPrimCount
-     write(*,*) i_prim,"/",totPrimCount, "( in emomentum_from_MO)"
+     !write(*,*) i_prim,"/",totPrimCount, "( in emomentum_from_MO)"
 
 lmn_p=lmn_vec(i,:)
     do j=1,3
-       write(*,*) j,"/3 (j in emomentum_from_MO)"
+       !write(*,*) j,"/3 (j in emomentum_from_MO)"
        select case(j)
        case(1)
         lmn_p(1)=lmn_p(1)+1
@@ -986,7 +991,7 @@ lmn_p=lmn_vec(i,:)
         lmn_p(3)=lmn_p(3)+1
        end select 
        
-       write(*,*) "call of uvolkov_on_CG ( in emomentum_from_MO)"
+       !write(*,*) "call of uvolkov_on_CG ( in emomentum_from_MO)"
        call uvolkov_on_CG(Anl,Alpha_nl, Phi_nl,cZeta(i_prim),lmn_p,prim_center(i_prim,:), eps,kvec,it, BigGamma1(i_prim))
        BigGamma1(i_prim)=eps(j)*BigGamma1(i_prim)/dsqrt(4.d0*cZeta(i_prim))
     enddo
@@ -1027,7 +1032,7 @@ integer						                       :: n,nn,i,j
 nn=0
 res=dcmplx(1.d0,0.d0)
 do i=1,3 
-write(*,*) i,"/3 (i in uvolkov_on_CG)"
+!write(*,*) i,"/3 (i in uvolkov_on_CG)"
 Atemp=Anl*eps(i)
 Alpha_temp=Alpha_nl*eps(i)
 k_transl=veck(i)-Atemp
@@ -1035,12 +1040,12 @@ R_transl=Rc(i)+Alpha_temp
 
 n=lmn(i)
 
-write(*,*) 'before calc of res'
+!write(*,*) 'before calc of res'
 res= res*Hermite(k_transl/dsqrt(4.d0*zet),n )*cdexp( -k_transl*k_transl*( dcmplx(1.d0/(4.d0*zet), -Dtime*pdt/2.d0) ))
-write(*,*) 'before calc of res second line'
+!write(*,*) 'before calc of res second line'
 res=res*cdexp(dcmplx(0.d0, R_transl*k_transl))
 nn=nn+n
-write(*,*) 'end of loop on uvolkov_on_CG'
+!write(*,*) 'end of loop on uvolkov_on_CG'
 enddo
 
 res=res*cdexp(dcmplx(0.d0,-pio2*nn-Phi_nl))/(dsqrt(dsqrt(twopi*zet)))**3  ! e^(-i pi/2) =-i
@@ -1069,7 +1074,7 @@ integer   :: i
 
     if(n.le.10)then
      do i = 0, n  
-        write(*,*) "i=",i,"/",n,"in Hermite)"
+        !write(*,*) "i=",i,"/",n,"in Hermite)"
         Hermite=Hermite+ A(i)*(kk**i)  
      end do 
     else
@@ -1086,13 +1091,13 @@ Subroutine Hermite_Coeff(n,A)
   integer i,j,n
 real(kind=real_8), dimension(10), intent(inout) :: A
 real(kind=real_8), dimension(10,10)   :: B
-  write(*,*) "Begining of Hermite_Coeff"
+  !write(*,*) "Begining of Hermite_Coeff"
   !Establish l0 and l1 coefficients
   B(0,0)=1.d0 ; B(1,0)=0.d0 ; B(1,1)=2.d0
   !Return if order is less than two
   if (n>1) then
     do i = 2, n
-      write(*,*) "i = ",i,"/",n,"(in Hermite_Coeff)"
+      !write(*,*) "i = ",i,"/",n,"(in Hermite_Coeff)"
       B(i,0)=-2.d0*(i-1)*B(i-2,0)
       do j = 1, i
         !Basic recursion relation
