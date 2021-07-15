@@ -979,7 +979,7 @@ BigGamma2=dcmplx(0.d0,0.d0)
 do i_prim=1,totPrimCount
      write(*,*) i_prim,"/",totPrimCount, "( in emomentum_from_MO)"
 
-lmn_p=lmn_vec(i,:)
+lmn_p=lmn_vec(i_prim,:)
     do j=1,3
        !write(*,*) j,"/3 (j in emomentum_from_MO)"
        select case(j)
