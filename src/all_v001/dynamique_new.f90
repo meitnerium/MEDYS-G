@@ -977,7 +977,7 @@ BigGamma1=dcmplx(0.d0,0.d0)
 BigGamma2=dcmplx(0.d0,0.d0)
 
 do i_prim=1,totPrimCount
-     !write(*,*) i_prim,"/",totPrimCount, "( in emomentum_from_MO)"
+     write(*,*) i_prim,"/",totPrimCount, "( in emomentum_from_MO)"
 
 lmn_p=lmn_vec(i,:)
     do j=1,3
