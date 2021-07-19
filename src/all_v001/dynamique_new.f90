@@ -56,6 +56,7 @@ Real(kind=real_8),Dimension(:,:),Intent(in)			::H0qq
 Real(kind=real_8),Dimension(:,:),Intent(in)			::H0pp,MUpp,MUqq
 !Real(kind=real_8),Dimension(3)	,Intent(in)			::eps
 
+complex(kind=comp_16),allocatable,dimension(:,:,:,:)	   ::Volkov_OM_mat
 
 Real(kind=real_8)					::PreStart,PreEnd,TotalPre
 Real(kind=real_8)					::PropStart,PropEnd,TotalProp
@@ -88,6 +89,8 @@ call cpu_time ( t1 )
         !close(900+j)
     end do
 
+allocate(Volkov_OM_mat(nt,nt,orb_Q,orb_Q))
+Volkov_OM_mat=dcmplx(0.d0,0.d0)
 
 do tn=1,nt  ! begin time-loop
 t=tn
@@ -109,7 +112,7 @@ matA(tn)=Int0()
 !
  write(*,*) 'calling propagation, tn=',tn,'/',nt
 	call new_propagation(fctQ,fctP,Upp,muEPS,muEPS_Sq,H0qq,H0pp,MUqq,MUpp,Mat33,Inv33, & 
-matA,eps,cEta,cZeta,lmn_vec,prim_center,lcCG,Ers) ! ,matAlpha,matPhi
+matA,eps,cEta,cZeta,lmn_vec,prim_center,lcCG,Ers,Volkov_OM_mat) ! ,matAlpha,matPhi
 
 	sauvChamp(tn+1)=champNint()
 ! 
@@ -274,7 +277,7 @@ end subroutine CalPre
 !****************************************************************************************
 !****************************************************************************************
 subroutine  new_propagation(fctQ,fctP,Upp,muEPS,muEPS_Sq,H0qq,H0pp,MUqq,MUpp,Mat33,Inv33, &
-matA,eps,cEta,cZeta,lmn_vec,prim_center,lcCG,Ers) ! ,matAlpha,matPhi
+matA,eps,cEta,cZeta,lmn_vec,prim_center,lcCG,Ers,Volkov_OM_mat) ! ,matAlpha,matPhi
 !
 !
 !****************************************************************************************
@@ -300,7 +303,7 @@ Real(kind=real_8),  Dimension(:,:,:,:),Intent(in) 	:: Ers
 complex(kind=comp_16),allocatable,dimension(:)     ::CI1,CI2,CI3,CI4,CI5,CI
 complex(kind=comp_16),allocatable,dimension(:,:)   ::muEPS_r_gam,Uqq  , gamm2!,gammCorrection
 !complex(kind=comp_16),allocatable,dimension(:,:,:)   ::Upp
-complex(kind=comp_16),allocatable,dimension(:,:,:,:)	   ::Volkov_OM_mat
+complex(kind=comp_16),dimension(:,:,:,:)	   ::Volkov_OM_mat
 
 integer						                   ::l,ll,i,j,jj,k,r,s,k1,k2,k3,kk,kkj
 real(kind=real_8)				                   ::Et,normQ,normP,P_normfactor
@@ -322,14 +325,15 @@ call Udiag(H0qq,MUqq,dimQ,Uqq,delta)
 call Udiag(H0pp,MUpp,dimP,Upp(tn,:,:),delta)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-allocate(Volkov_OM_mat(nt,nt,orb_Q,orb_Q), muEPS_r_gam(orb_Q,dimP))
+!allocate(Volkov_OM_mat(nt,nt,orb_Q,orb_Q), muEPS_r_gam(orb_Q,dimP))
+allocate(muEPS_r_gam(orb_Q,dimP))
 allocate(CI1(dimQ),CI2(dimQ),CI3(dimQ),CI4(dimQ),CI5(dimQ),CI(dimQ))
 allocate(P_J_Ion_amplitude(dimP))
 !
 !!!!!!Propagation within Q-space!!!  
 !
 muEPS_r_gam=dcmplx(0.d0,0.d0)
-Volkov_OM_mat=dcmplx(0.d0,0.d0)
+!Volkov_OM_mat=dcmplx(0.d0,0.d0)
 
 
 call Get_muEPS_r_gam(Upp,muEPS,muEPS_r_gam,lcCG,matA,eps,cEta,cZeta,lmn_vec,prim_center,Volkov_OM_mat,fctP,Ers) !,matAlpha,matPhi
@@ -859,7 +863,7 @@ subroutine Get_Observable_P_I(Upp,fctP,muEPS_Sq,Volkov_OM_mat,matA,P_J_Ion_ampli
 !***************************************************
 complex(kind=comp_16),dimension(:,:,:),intent(in) ::fctP,Upp
 Real(kind=real_8),  Dimension(:),Intent(in)		:: matA
-complex(kind=comp_16),allocatable,dimension(:,:,:,:),Intent(in)	   ::Volkov_OM_mat
+complex(kind=comp_16),dimension(:,:,:,:),Intent(in)	   ::Volkov_OM_mat
 Complex(kind=comp_16), Dimension(:,:),Intent(in) 	::  muEPS_Sq
 Complex(kind=comp_16), Dimension(:) 	::  P_J_Ion_amplitude
 Integer(kind=int_4), Intent(in)::t_idx
@@ -878,16 +882,26 @@ if(t_idx.ge.2) then
                 if(tnn.lt.t_idx) then
                    temp=fctP(:,r,tnn)
                    temp2=fctP(:,s,tnp)
+                   write(*,*) "temp2 in Get_Observable_P_I : ",temp2
                    do nn=tnn,tn-1
                       call gemv(Upp(nn,:,:),temp,tempr) !todo: a separer en 2 lignes et pleins d'autres!!!
+                      write(*,*) "tempr in Get_Observable_P_I : ",tempr
                       temp = tempr
                    enddo
                    do nn=tnp,tn-1
                       call gemv(Upp(nn,:,:),temp2,tempr2)
+                      write(*,*) "Upp(n,:,:) in Get_Observable_P_I : ",Upp(nn,:,:)
+                      write(*,*) "tempr2 in Get_Observable_P_I : ",tempr2
                       temp2 = tempr2
                    enddo
                  endif
+               write(*,*) "matA(tnp) in Get_Observable_P_I :", matA(tnp)
+               write(*,*) "matA(tnn) in Get_Observable_P_I :", matA(tnn)
+               write(*,*) "temp(j) in Get_Observable_P_I :", temp(j)
+               write(*,*) "temp2(j) in Get_Observable_P_I :", temp2(j)
+               write(*,*) "Volkov_OM_mat(tnn,tnp,r,s) in Get_Observable_P_I :", Volkov_OM_mat(tnn,tnp,r,s)
                ztemp=matA(tnp)*matA(tnn)*conjg(temp(j))*temp2(j)*Volkov_OM_mat(tnn,tnp,r,s)  !  matA(tnp-1,tnp-1)*matA(tnn-1,tnn-1)  ????
+               write(*,*) "ztemp in Get_Observable_P_I :", ztemp
                P_J_Ion_amplitude(j)= P_J_Ion_amplitude(j)+(ztemp+conjg(ztemp))
                enddo
                P_J_Ion_amplitude(j)= P_J_Ion_amplitude(j)+matA(tnn)*matA(tnn)*conjg(temp(j))*temp2(j)*muEPS_Sq(r,s)
@@ -977,9 +991,9 @@ BigGamma1=dcmplx(0.d0,0.d0)
 BigGamma2=dcmplx(0.d0,0.d0)
 
 do i_prim=1,totPrimCount
-     write(*,*) i_prim,"/",totPrimCount, "( in emomentum_from_MO)"
+    write(*,*) i_prim,"/",totPrimCount, "( in emomentum_from_MO)"
 
-lmn_p=lmn_vec(i_prim,:)
+    lmn_p=lmn_vec(i_prim,:)
     do j=1,3
        !write(*,*) j,"/3 (j in emomentum_from_MO)"
        select case(j)
@@ -994,6 +1008,8 @@ lmn_p=lmn_vec(i_prim,:)
        !write(*,*) "call of uvolkov_on_CG ( in emomentum_from_MO)"
        call uvolkov_on_CG(Anl,Alpha_nl, Phi_nl,cZeta(i_prim),lmn_p,prim_center(i_prim,:), eps,kvec,it, BigGamma1(i_prim))
        BigGamma1(i_prim)=eps(j)*BigGamma1(i_prim)/dsqrt(4.d0*cZeta(i_prim))
+       write(*,*) "eps(j)", eps(j)
+       write(*,*) "BigGamma1(i_prim)", BigGamma1(i_prim)
     enddo
 
     call uvolkov_on_CG(Anl,Alpha_nl, Phi_nl,cZeta(i_prim),lmn_vec(i_prim,:),prim_center(i_prim,:), eps,kvec,it, BigGamma2(i_prim))
@@ -1007,6 +1023,7 @@ call gemv(lcCG, BigGamma2,temp2)
 call gemv(muEPS,temp2,temp) !todo decommenter !
 
 gamm_res=temp1-temp
+write(*,*) gamm_res 
 
 end subroutine emomentum_from_MO
 
