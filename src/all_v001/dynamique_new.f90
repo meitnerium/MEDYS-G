@@ -289,6 +289,7 @@ real(kind=real_8),dimension(:,:),intent(in)	       ::H0qq,H0pp,MUqq,Mupp
 !Integer(kind=int_4),Intent(in)		               ::opt_GS
 complex(kind=comp_16),dimension(:),intent(inout)   ::fctQ
 complex(kind=comp_16),dimension(:,:,:),intent(inout) ::fctP,Upp
+complex(kind=comp_16),allocatable, dimension(:,:) ::Upp_loc
 Complex(kind=comp_16), Dimension(:,:),Intent(in) 	:: muEPS,muEPS_Sq
 
 Real(kind=real_8),  Dimension(:),Intent(inout)		:: matA
@@ -320,7 +321,10 @@ real(kind=real_8)                                  ::seuil !TODO to be deleted a
 
 allocate(Uqq(dimQ,dimQ) )!,Upp(nt,dimP,dimP)) déjà dimensioné au main
 Uqq=dcmplx(0.d0,0.d0)
-Upp=dcmplx(0.d0,0.d0)
+allocate(Upp_loc(dimP,dimP))
+Upp_loc=dcmplx(0.d0,0.d0)
+Upp(nt,:,:) = Upp_loc
+deallocate(Upp_loc)
 call Udiag(H0qq,MUqq,dimQ,Uqq,delta)
 call Udiag(H0pp,MUpp,dimP,Upp(tn,:,:),delta)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!
