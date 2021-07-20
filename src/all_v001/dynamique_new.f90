@@ -323,10 +323,10 @@ allocate(Uqq(dimQ,dimQ) )!,Upp(nt,dimP,dimP)) déjà dimensioné au main
 Uqq=dcmplx(0.d0,0.d0)
 allocate(Upp_loc(dimP,dimP))
 Upp_loc=dcmplx(0.d0,0.d0)
+call Udiag(H0qq,MUqq,dimQ,Uqq,delta)
+call Udiag(H0pp,MUpp,dimP,Upp_loc,delta)
 Upp(nt,:,:) = Upp_loc
 deallocate(Upp_loc)
-call Udiag(H0qq,MUqq,dimQ,Uqq,delta)
-call Udiag(H0pp,MUpp,dimP,Upp(tn,:,:),delta)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 !allocate(Volkov_OM_mat(nt,nt,orb_Q,orb_Q), muEPS_r_gam(orb_Q,dimP))
