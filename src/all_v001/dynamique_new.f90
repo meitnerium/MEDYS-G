@@ -361,6 +361,7 @@ call gemv(Mat33,CI3,CI4) 				!Etape4
 call gemv(Uqq,CI5,CI)                   !Etape6
  
 fctQ=CI					!propagation of Q-part of wp done
+write(*,*) "fctQ(",tn,")",fctQ
 
 deallocate(CI4,CI5,CI)
 !!!!!!!!!!!!!!!!!!!!!!!!!!
