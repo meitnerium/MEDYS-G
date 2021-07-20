@@ -553,6 +553,7 @@ write(*,*)'dimQ=',dimQ
 ! START DYNAMICS
 !Call dyna=actual dynamical calculation (Propagation of TD wavefunction through TD CI coefficients)
 !////////////////////////////////////////////////////////////////////////////////////////////////
+write(*,*) "dimQ", dimQ
 allocate(sauvChamp(nt+1),fctQ(dimQ),fctP(dimP,orb_Q, nt), Upp(nt,dimP,dimP), matA(nt),eMomentum_gam(dimP)) ! ,matAlpha(nt,nt),matPhi(nt,nt)
 !allocate(Hqp(dimQ,dimP*nk),Hpq(dimP*nk,dimQ))
 
