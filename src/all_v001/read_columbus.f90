@@ -2843,10 +2843,10 @@ case(3)     ! J est une orbitale d centree sur IS
 
   enddo
  enddo
-call gemm(lcao,cEta,lcCG)
+!call gemm(lcao,cEta,lcCG)
 !
 ! should be
-! call gemm(transpose(lcao),cEta,lcCG)
+call gemm(transpose(lcao),cEta,lcCG)
 !
 
 end subroutine Join_Prim_Info
