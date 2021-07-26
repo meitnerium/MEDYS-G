@@ -859,11 +859,152 @@ integer :: comb
 
 end function
 
-
 !***************************************************
 !***************************************************
 !***************************************************
 subroutine Get_Observable_P_I(Upp,fctP,muEPS_Sq,Volkov_OM_mat,matA,P_J_Ion_amplitude,t_idx)
+!***************************************************
+!***************************************************
+complex(kind=comp_16),dimension(:,:,:),intent(in) ::fctP,Upp
+Real(kind=real_8),  Dimension(:),Intent(in)             :: matA
+complex(kind=comp_16),dimension(:,:,:,:),Intent(in)::Volkov_OM_mat
+Complex(kind=comp_16), Dimension(:,:),Intent(in)        ::  muEPS_Sq
+Complex(kind=comp_16), Dimension(:)     ::  P_J_Ion_amplitude
+Integer(kind=int_4), Intent(in)::t_idx
+Integer(kind=int_4)  ::nn,r,s,tnn,tnp
+Complex(kind=comp_16), Dimension(dimP)  ::  temp,temp2,tempr,tempr2!,ztemp 
+Complex(kind=comp_16)   ::  ztemp 
+
+P_J_Ion_amplitude=dcmplx(0.d0,0.d0)
+if(t_idx.ge.2) then
+
+
+         select case (t_idx)
+case (2)
+
+      do r=1,orb_Q
+        do s=1,orb_Q
+            temp=fctP(:,r,t_idx)
+            temp2=fctP(:,s,t_idx)
+            do j=1,dimP 
+            P_J_Ion_amplitude(j) = P_J_Ion_amplitude(j)+matA(t_idx-1)*matA(t_idx-1)*conjg(temp(j) )*temp2(j) *muEPS_Sq(r,s)
+            enddo 
+        enddo
+      enddo
+            
+case default
+
+      do r=1,orb_Q
+        do s=1,orb_Q
+           do tnn=2, t_idx
+              do tnp= tnn+1, t_idx
+                   temp=fctP(:,r,tnn)
+                   temp2=fctP(:,s,tnp)
+                   if(tnn.lt.t_idx) then                  
+                    do nn=tnn,t_idx-1
+                      call gemv(Upp(nn,:,:),temp,tempr) !todo: a separer en 2lignes et pleins d'autres!!!
+                      temp=tempr
+                    enddo
+                   endif
+                   if(tnp.lt.t_idx) then                  
+                    do nn=tnp,t_idx-1
+                      call gemv(Upp(nn,:,:),temp2,tempr2)
+                       temp2=tempr2                   
+                    enddo
+                   endif
+                  do j=1,dimP  
+                  ztemp=matA(tnp)*matA(tnn)*conjg(temp(j) )*temp2(j)*Volkov_OM_mat(tnn,tnp,r,s)  !  matA(tnp-1,tnp-1)*matA(tnn-1,tnn-1)  ????
+                  P_J_Ion_amplitude(j) = P_J_Ion_amplitude(j)+(ztemp+conjg(ztemp))
+                  enddo
+              enddo
+                 do j=1,dimP 
+                 P_J_Ion_amplitude(j) = P_J_Ion_amplitude(j)+matA(tnn)*matA(tnn)*conjg(temp(j) )*temp2(j) *muEPS_Sq(r,s)
+                 enddo 
+         enddo
+      enddo
+ enddo
+end select             
+endif
+ end subroutine Get_Observable_P_I        
+
+
+
+!***************************************************
+!***************************************************
+!***************************************************
+subroutine Get_Observable_P_I2(Upp,fctP,muEPS_Sq,Volkov_OM_mat,matA,P_J_Ion_amplitude,t_idx)
+!***************************************************
+!***************************************************
+complex(kind=comp_16),dimension(:,:,:),intent(in) ::fctP,Upp
+Real(kind=real_8),  Dimension(:),Intent(in)             :: matA
+complex(kind=comp_16),dimension(:,:,:,:),Intent(in)::Volkov_OM_mat
+Complex(kind=comp_16), Dimension(:,:),Intent(in)        ::  muEPS_Sq
+Complex(kind=comp_16), Dimension(:)     ::  P_J_Ion_amplitude
+Integer(kind=int_4), Intent(in)::t_idx
+Integer(kind=int_4)  ::nn,r,s,tnn,tnp
+Complex(kind=comp_16), Dimension(dimP)  ::  temp,temp2,tempr,tempr2!,ztemp 
+Complex(kind=comp_16)   ::  ztemp 
+
+P_J_Ion_amplitude=dcmplx(0.d0,0.d0)
+if(t_idx.ge.2) then
+
+
+select case (t_idx)
+case (2)
+
+      do r=1,orb_Q
+        do s=1,orb_Q
+            temp=fctP(:,r,t_idx)
+            temp2=fctP(:,s,t_idx)
+            do j=1,dimP 
+            P_J_Ion_amplitude(j) = P_J_Ion_amplitude(j)+matA(t_idx)*matA(t_idx)*conjg(temp(j) )*temp2(j) *muEPS_Sq(r,s)
+            enddo 
+        enddo
+      enddo
+            
+case default
+
+do r=1,orb_Q
+  do s=1,orb_Q
+    do tnn=2, t_idx
+      do tnp= tnn+1, t_idx
+        temp=fctP(:,r,tnn)
+        temp2=fctP(:,s,tnp)
+        if(tnn.lt.t_idx) then                  
+          do nn=tnn,t_idx-1
+            call gemv(Upp(nn,:,:),temp,tempr) !todo: a separer en 2lignes et pleins d'autres!!!
+            temp=tempr
+          enddo
+        endif
+        if(tnp.lt.t_idx) then                  
+          do nn=tnp,t_idx-1
+            call gemv(Upp(nn,:,:),temp2,tempr2)
+            temp2=tempr2                   
+          enddo
+        endif
+        do j=1,dimP  
+          ztemp=matA(tnp)*matA(tnn)*conjg(temp(j) )*temp2(j)*Volkov_OM_mat(tnn,tnp,r,s)  !  matA(tnp-1,tnp-1)*matA(tnn-1,tnn-1)  ????
+          P_J_Ion_amplitude(j) = P_J_Ion_amplitude(j)+(ztemp+conjg(ztemp))
+        enddo
+      enddo
+      do j=1,dimP 
+        P_J_Ion_amplitude(j) = P_J_Ion_amplitude(j)+matA(tnn)*matA(tnn)*conjg(temp(j) )*temp2(j) *muEPS_Sq(r,s)
+      enddo 
+    enddo
+  enddo
+enddo
+end select             
+end if
+ end subroutine Get_Observable_P_I2   
+
+
+
+
+
+!***************************************************
+!***************************************************
+!***************************************************
+subroutine Get_Observable_P_I_old(Upp,fctP,muEPS_Sq,Volkov_OM_mat,matA,P_J_Ion_amplitude,t_idx)
 !***************************************************
 !***************************************************
 complex(kind=comp_16),dimension(:,:,:),intent(in) ::fctP,Upp
@@ -915,7 +1056,7 @@ if(t_idx.ge.2) then
       enddo
  enddo
 endif
- end subroutine Get_Observable_P_I        
+ end subroutine Get_Observable_P_I_old        
 
 
 !*******************************************
