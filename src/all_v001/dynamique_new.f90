@@ -313,7 +313,7 @@ real(kind=real_8),allocatable,dimension(:)	       ::fctPInt,fctPInt2
 
 Complex(kind=comp_16),allocatable, Dimension(:)     ::  P_J_Ion_amplitude
 
-real(kind=real_8)                                  ::seuil !TODO to be deleted after test
+real(kind=real_8)                                  ::seuil, sumfctQ !TODO to be deleted after test
 
     Character(len=5)                    ::nom
 !    Character(len=23)                   ::canal
@@ -362,6 +362,10 @@ call gemv(Uqq,CI5,CI)                   !Etape6
  
 fctQ=CI					!propagation of Q-part of wp done
 write(*,*) "fctQ(",tn,")",fctQ
+do j=1,dimQ
+   sumfctQ = sumfctQ+ abs(fctQ(j))**2
+end do
+write(*,*) "Sum fctQ = ",sumfctQ
 
 deallocate(CI4,CI5,CI)
 !!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -752,6 +756,7 @@ Integer(kind=int_4), Intent(in)::tn,tnn
 Integer(kind=int_4) :: i,j,k,n,nn
 
 
+if(tnn.lt.tn) then
 A_nl=0.d0; Alpha_nl=0.d0; Phi_nl=0.d0
 do i=tnn,tn-1
    A_nl= A_nl+ matA(i)
@@ -760,7 +765,7 @@ do i=tnn,tn-1
 enddo
 Alpha_nl=Alpha_nl*pdt
 Phi_nl=Phi_nl*pdt
-
+end if
 end subroutine  Get_Anl_Alpha_Phi
 
 
@@ -1067,7 +1072,7 @@ subroutine Get_Observable_eMomentum_map(kvec,fctP,Upp,ek_Amp,lcCG,muEPS,matA,eps
 complex(kind=comp_16),dimension(:,:,:),intent(in) ::fctP,Upp !Upp(nt,dimP,dimP)
 Complex(kind=comp_16), Dimension(:,:),Intent(in) 	:: muEPS
 
-Real(kind=real_8),  Dimension(:),Intent(in)		:: matA
+Real(kind=real_8),  Dimension(:)		:: matA
  !Real(kind=real_8), dimension(:,:),Intent(in):: matAlpha, matPhi
 Real(kind=real_8)    		:: A_nl, Alpha_nl,Phi_nl
 
@@ -1090,13 +1095,13 @@ ek_Amp=dcmplx(0.d0,0.d0)
 if(tn.ge.2)then
     do tnn=2,tn
 
-        !call Get_Anl_Alpha_Phi(matA,tn,tnn,A_nl,Alpha_nl,Phi_nl)
+        call Get_Anl_Alpha_Phi(matA,tn,tnn,A_nl,Alpha_nl,Phi_nl)
         call emomentum_from_MO(tn-tnn,A_nl,Alpha_nl,Phi_nl,eps,cZeta ,lmn_vec ,prim_center,lcCG,muEPS,kvec,gamm2)
         temp=fctP(:,:,tnn)
         if(tnn.lt.tn)then
             do nn=tnn,tn-1
-                call gemm(Upp(nn,:,:),temp,temp) ! todo: a modifier
-                !temp=temp2
+                call gemm(Upp(nn,:,:),temp,temp2) ! todo: a modifier
+                temp=temp2
             end do
         endif
 
@@ -1137,7 +1142,7 @@ BigGamma1=dcmplx(0.d0,0.d0)
 BigGamma2=dcmplx(0.d0,0.d0)
 
 do i_prim=1,totPrimCount
-    write(*,*) i_prim,"/",totPrimCount, "( in emomentum_from_MO)"
+    !write(*,*) i_prim,"/",totPrimCount, "( in emomentum_from_MO)"
 
     lmn_p=lmn_vec(i_prim,:)
     do j=1,3
@@ -1154,13 +1159,13 @@ do i_prim=1,totPrimCount
        !write(*,*) "call of uvolkov_on_CG ( in emomentum_from_MO)"
        call uvolkov_on_CG(Anl,Alpha_nl, Phi_nl,cZeta(i_prim),lmn_p,prim_center(i_prim,:), eps,kvec,it, BigGamma1(i_prim))
        BigGamma1(i_prim)=eps(j)*BigGamma1(i_prim)/dsqrt(4.d0*cZeta(i_prim))
-       write(*,*) "eps(j)", eps(j)
-       write(*,*) "BigGamma1(i_prim)", BigGamma1(i_prim)
+       !write(*,*) "eps(j)", eps(j)
+       !write(*,*) "BigGamma1(i_prim)", BigGamma1(i_prim)
     enddo
 
     call uvolkov_on_CG(Anl,Alpha_nl, Phi_nl,cZeta(i_prim),lmn_vec(i_prim,:),prim_center(i_prim,:), eps,kvec,it, BigGamma2(i_prim))
 
-    BigGamma1(i_prim)=BigGamma1(i_prim)-dot_product(eps,prim_center(i_prim,:) )*BigGamma2(i_prim)
+    BigGamma1(i_prim)=BigGamma1(i_prim)+dot_product(eps,prim_center(i_prim,:) )*BigGamma2(i_prim)
 
 enddo
 
@@ -1169,7 +1174,7 @@ call gemv(lcCG, BigGamma2,temp2)
 call gemv(muEPS,temp2,temp) !todo decommenter !
 
 gamm_res=temp1-temp
-write(*,*) gamm_res 
+!write(*,*) gamm_res 
 
 end subroutine emomentum_from_MO
 
