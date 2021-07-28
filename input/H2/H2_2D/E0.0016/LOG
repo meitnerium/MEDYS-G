@@ -1,0 +1,373 @@
+ test on line 132 of readinput in all_v001
+  basis_file ->H2_R_1_40                       
+  job ->test_H2                         
+ QCsoft=           0
+Number atomic orbitals to be construc 10
+ Norb totales	           3
+ Norb liees 	           2
+ Norb lues	          10
+ 
+ total memory allocated on line 175 of main =                   488  bytes
+ Début de lecture_gauss
+ test on line 189 of main.f90          10
+ total memory allocated on line 216 of main =                 25504  bytes
+ 
+ Reading integrals ...
+ Done.
+ 
+ Reading LCAO coefficients ...
+ Done.
+ 
+ importing size namelist
+ n_unit =          101
+ Checkpoint = == == = =
+ Iostat for size is :          -1
+ ERROR MESSAGE for size reading
+ 
+ Reorder size =           10
+ 
+           1           2           3           4           5           6
+           7           8           9          10
+ iostat is :            0
+ File read
+ dimension dim_1 et dim_2:           10          10
+ matrix_MO loop
+ Integral transformations: AOs to MOs with n5 algo
+  One-electron integrals
+  Two-electron integrals
+ file_exists= T
+ test on line 318 after allocation
+ i=           1 j=           1 hA(i,j)=
+ (-1.25091009801097,0.000000000000000E+000)
+ i=           1 j=           2 hA(i,j)=
+ (-1.214306433183765E-016,0.000000000000000E+000)
+ i=           2 j=           1 hA(i,j)=
+ (8.966351966455122E-017,0.000000000000000E+000)
+ i=           2 j=           2 hA(i,j)=
+ (-0.547507862105852,0.000000000000000E+000)
+ test on line 352 after allocate
+ dimCSF_r in dimension_DRT =    6.00000000000000     
+ allocating DRT need                    544  bytes
+ total memory used =                  26048  bytes
+ dimDRT=           7
+    4    1        1    0    2        2    0    3    0         0     0     3     0         5
+    3    2        1    0    1        4    0    5    6         0     0     1     2         3
+    3    3        0    1    1        5    6    0    0         0     1     0     0         2
+    2    4        1    0    0        0    0    0    7         0     0     0     0         1
+    2    5        0    1    0        0    7    0    0         0     0     0     0         1
+    2    6        0    0    1        7    0    0    0         0     0     0     0         1
+    1    7        0    0    0        0    0    0    0         0     0     0     0         1
+ 
+  Calcul des generateurs mono-electroniques...
+  Calcul des generateurs bi-electroniques...
+  Mono-électroniques:
+ dimCSF=                     5
+ dimQ=                     3
+ dimQ                     3
+ Post allocation
+ Hamiltonians
+ orb_Q           2
+ Debut dynamique
+ Debut dynamique
+          30 number of timesteps
+ tn =            1 Elapsed CPU time =   2.530000000000032E-004
+  ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
+  dimQ                     3
+ calling propagation, tn=           1 /          30
+ fctQ(           1 ) (0.576738235535330,-0.814198758151950)
+ (2.192786487587292E-005,6.178953462565279E-006)
+ (-3.857004973547018E-002,5.445053750528346E-002)
+ Sum fctQ =   0.999999120394804     
+      02      9.42478       1.19369230719558E-37
+      02      9.42478       1.36988924134547E-18
+ tn =            2 Elapsed CPU time =   9.250000000000022E-004
+  ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
+  dimQ                     3
+ calling propagation, tn=           2 /          30
+ fctQ(           2 ) (0.331030299948933,0.941256615722286)
+ (-2.849030249558534E-005,4.120706895902660E-005)
+ (-2.213808505299304E-002,-6.294756020438295E-002)
+ Sum fctQ =   0.999997568780469     
+      03     14.13717       2.98941678488410E-36
+      03     14.13717       4.26699510937999E-18
+ tn =            3 Elapsed CPU time =   6.745600000000000E-002
+  ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
+  dimQ                     3
+ calling propagation, tn=           3 /          30
+ fctQ(           3 ) (-0.959419524796952,-0.273943007373460)
+ (-4.263428980774107E-005,6.548154627410372E-005)
+ (6.416369241958331E-002,1.831991239542625E-002)
+ Sum fctQ =   0.999983200571031     
+      04     18.84956       5.59338575183552E-33
+      04     18.84956       3.77116113695989E-16
+ tn =            4 Elapsed CPU time =   0.200208000000000     
+  ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
+  dimQ                     3
+ calling propagation, tn=           4 /          30
+ fctQ(           4 ) (0.778023722585729,-0.624486403382664)
+ (-3.955988472334669E-004,-3.517759137713487E-004)
+ (-5.199896383539216E-002,4.176455819656074E-002)
+ Sum fctQ =   0.999752631722021     
+      05     23.56194       7.93620744711969E-28
+      05     23.56194       9.46126171422202E-14
+ tn =            5 Elapsed CPU time =   0.399268000000000     
+  ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
+  dimQ                     3
+ calling propagation, tn=           5 /          30
+ fctQ(           5 ) (5.987260374431026E-002,0.995509441817508)
+ (1.561055302899286E-003,-7.449942182617832E-004)
+ (-3.979425845253140E-003,-6.628429020290544E-002)
+ Sum fctQ =   0.999036212294734     
+      06     28.27433       1.21623381664856E-25
+      06     28.27433       9.64570066649869E-13
+ tn =            6 Elapsed CPU time =   0.664599000000000     
+  ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
+  dimQ                     3
+ calling propagation, tn=           6 /          30
+ fctQ(           6 ) (-0.846687742116694,-0.526327168013931)
+ (7.012348093569049E-004,3.400969410518316E-003)
+ (5.584615855656166E-002,3.529920351034021E-002)
+ Sum fctQ =   0.998277305957409     
+      07     32.98672       4.15304774366439E-25
+      07     32.98672       1.32942788449901E-12
+ tn =            7 Elapsed CPU time =   0.959595000000000     
+  ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
+  dimQ                     3
+ calling propagation, tn=           7 /          30
+ fctQ(           7 ) (0.918798954137488,-0.386669631410664)
+ (-3.898782102812629E-003,7.272020791000777E-004)
+ (-6.198618693012005E-002,2.516269075971286E-002)
+ Sum fctQ =   0.998196099680555     
+      08     37.69911       3.59400377924930E-26
+      08     37.69911       1.18390310607590E-12
+ tn =            8 Elapsed CPU time =    1.25779200000000     
+  ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
+  dimQ                     3
+ calling propagation, tn=           8 /          30
+ fctQ(           8 ) (-0.215536386151450,0.972893885817317)
+ (-5.026640666746720E-004,-2.653508508739603E-003)
+ (1.398032532070246E-002,-6.565434566623320E-002)
+ Sum fctQ =   0.997491683195449     
+      09     42.41150       7.04953331435254E-25
+      09     42.41150       7.63995908502472E-13
+ tn =            9 Elapsed CPU time =    1.60571200000000     
+  ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
+  dimQ                     3
+ calling propagation, tn=           9 /          30
+ fctQ(           9 ) (-0.668369987463022,-0.736790060620087)
+ (-9.402510366091604E-004,5.512545417352266E-003)
+ (4.202008879195934E-002,4.591542623184663E-002)
+ Sum fctQ =   0.993483220026998     
+      10     47.12389       1.44905264461465E-22
+      10     47.12389       3.69133735044871E-11
+ tn =           10 Elapsed CPU time =    2.00342400000000     
+  ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
+  dimQ                     3
+ calling propagation, tn=          10 /          30
+ fctQ(          10 ) (0.984541015502002,-0.120188905525882)
+ (-1.806679927048215E-002,-1.164859033362205E-002)
+ (-5.795057994115256E-002,-7.673434551497792E-004)
+ Sum fctQ =   0.987587341641357     
+      11     51.83628       1.21400846479971E-21
+      11     51.83628       8.14613288135071E-11
+ tn =           11 Elapsed CPU time =    2.45090300000000     
+  ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
+  dimQ                     3
+ calling propagation, tn=          11 /          30
+ fctQ(          11 ) (-0.469069909023616,0.870983358936613)
+ (2.129823717887111E-002,-2.713395019809282E-002)
+ (4.550653395474133E-002,-5.189922431043526E-002)
+ Sum fctQ =   0.984592831372807     
+      12     56.54867       7.56083409508752E-22
+      12     56.54867       4.96345754814907E-11
+ tn =           12 Elapsed CPU time =    2.94816900000000     
+  ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
+  dimQ                     3
+ calling propagation, tn=          12 /          30
+ fctQ(          12 ) (-0.438401570197819,-0.885725585050096)
+ (2.862631598099679E-002,2.038711018586828E-002)
+ (3.386618089492845E-002,7.411491661930371E-002)
+ Sum fctQ =   0.984580788066517     
+      13     61.26106       9.63117400062432E-24
+      13     61.26106       7.80578266558446E-11
+ tn =           13 Elapsed CPU time =    3.49521600000000     
+  ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
+  dimQ                     3
+ calling propagation, tn=          13 /          30
+ fctQ(          13 ) (0.975303705744849,0.155141270093348)
+ (-2.039166127643764E-002,2.159145566041139E-002)
+ (-7.017863003525089E-002,3.176941328135938E-003)
+ Sum fctQ =   0.981103276002789     
+      14     65.97345       2.73030148658863E-21
+      14     65.97345       1.78349001754983E-10
+ tn =           14 Elapsed CPU time =    4.09212000000000     
+  ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
+  dimQ                     3
+ calling propagation, tn=          14 /          30
+ fctQ(          14 ) (-0.687401714942853,0.705431731800048)
+ (1.269825103090343E-002,-1.989383909412913E-003)
+ (2.174291975901608E-002,-2.942542282162372E-002)
+ Sum fctQ =   0.971658859232252     
+      15     70.68583       2.99791512573125E-20
+      15     70.68583       6.72333060745122E-10
+ tn =           15 Elapsed CPU time =    4.73901800000000     
+  ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
+  dimQ                     3
+ calling propagation, tn=          15 /          30
+ fctQ(          15 ) (-0.182231212501291,-0.962054045736891)
+ (-3.506251129509574E-002,8.021604209873749E-002)
+ (-4.155944310299588E-002,3.434707196405915E-002)
+ Sum fctQ =   0.969327103500252     
+      16     75.39822       1.16309546118129E-20
+      16     75.39822       1.57044817921932E-10
+ tn =           16 Elapsed CPU time =    5.43586200000000     
+  ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
+  dimQ                     3
+ calling propagation, tn=          16 /          30
+ fctQ(          16 ) (0.882960419808082,0.403333880979816)
+ (-0.127573071059531,-2.740184009536224E-002)
+ (-6.897254729383143E-002,-0.107640391494546)
+ Sum fctQ =   0.975666737955376     
+      17     80.11061       1.55941907499612E-20
+      17     80.11061       5.27121399544938E-10
+ tn =           17 Elapsed CPU time =    6.18271200000000     
+  ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
+  dimQ                     3
+ calling propagation, tn=          17 /          30
+ fctQ(          17 ) (-0.840617665886488,0.480904977200609)
+ (2.665335262667976E-002,-0.127780686581733)
+ (0.108127069413723,-9.164598723025211E-002)
+ Sum fctQ =   0.975036412481715     
+      18     84.82300       7.24695425471883E-22
+      18     84.82300       2.85640699303711E-09
+ tn =           18 Elapsed CPU time =    6.97963200000000     
+  ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
+  dimQ                     3
+ calling propagation, tn=          18 /          30
+ fctQ(          18 ) (9.656652703812582E-002,-0.964974200157696)
+ (0.168158514463596,6.397851590657386E-002)
+ (4.821289371308762E-002,7.382765406899061E-002)
+ Sum fctQ =   0.980645843223921     
+      19     89.53539       1.45228413145610E-19
+      19     89.53539       4.97818496673117E-09
+ tn =           19 Elapsed CPU time =    7.82649100000000     
+  ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
+  dimQ                     3
+ calling propagation, tn=          19 /          30
+ fctQ(          19 ) (0.733467776481606,0.636952302226458)
+ (-1.049358395426405E-002,0.190850741444431)
+ (-3.372696208572069E-002,2.138537892012798E-002)
+ Sum fctQ =   0.981812177665640     
+      20     94.24778       2.82973945228807E-19
+      20     94.24778       4.67944699553507E-09
+ tn =           20 Elapsed CPU time =    8.72347900000000     
+  ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
+  dimQ                     3
+ calling propagation, tn=          20 /          30
+ fctQ(          20 ) (-0.941460111876325,0.238532030887920)
+ (-0.115548682109618,7.607800159722877E-002)
+ (-1.867634599808800E-002,6.079249694043194E-002)
+ Sum fctQ =   0.966428565862089     
+      21     98.96017       9.16769872092759E-20
+      21     98.96017       1.73252707504676E-09
+ tn =           21 Elapsed CPU time =    9.67071400000000     
+  ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
+  dimQ                     3
+ calling propagation, tn=          21 /          30
+ fctQ(          21 ) (0.341119107625276,-0.897778547003146)
+ (-7.950605225492643E-002,-4.596952527084974E-002)
+ (-0.163193245770660,4.269057894602957E-002)
+ Sum fctQ =   0.959257495640844     
+      22    103.67256       2.69491978977941E-20
+      22    103.67256       2.61670778178442E-09
+ tn =           22 Elapsed CPU time =    10.6681250000000     
+  ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
+  dimQ                     3
+ calling propagation, tn=          22 /          30
+ fctQ(          22 ) (0.524401776846573,0.796483509918829)
+ (5.418190264238095E-002,-0.100256505347256)
+ (-0.110223104001496,-0.161266011568887)
+ Sum fctQ =   0.960526109713914     
+      23    108.38495       1.04018908373081E-20
+      23    108.38495       1.23718401487404E-08
+ tn =           23 Elapsed CPU time =    11.7157630000000     
+  ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
+  dimQ                     3
+ calling propagation, tn=          23 /          30
+ fctQ(          23 ) (-0.957129196040136,-3.965220253343874E-002)
+ (0.173686577548363,2.554447667347525E-002)
+ (9.455674570263947E-002,-9.183665830546421E-002)
+ Sum fctQ =   0.965863092553764     
+      24    113.09734       1.73262942788831E-19
+      24    113.09734       1.49733392215764E-08
+ tn =           24 Elapsed CPU time =    12.8137700000000     
+  ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
+  dimQ                     3
+ calling propagation, tn=          24 /          30
+ fctQ(          24 ) (0.588649886826437,-0.763833786330632)
+ (3.731705997496097E-002,0.185029063343701)
+ (3.923264904847321E-002,3.260119261687448E-002)
+ Sum fctQ =   0.968181098159392     
+      25    117.80972       9.41797648781613E-20
+      25    117.80972       7.20274944580088E-09
+ tn =           25 Elapsed CPU time =    13.9622120000000     
+  ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
+  dimQ                     3
+ calling propagation, tn=          25 /          30
+ fctQ(          25 ) (0.289542284596544,0.921241299322143)
+ (-0.155172970541424,6.204556282055267E-002)
+ (3.643436296320893E-002,-6.102062243388121E-003)
+ Sum fctQ =   0.961813266766662     
+      26    122.52211       5.93957401504411E-21
+      26    122.52211       1.36019836019559E-09
+ tn =           26 Elapsed CPU time =    15.1611520000000     
+  ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
+  dimQ                     3
+ calling propagation, tn=          26 /          30
+ fctQ(          26 ) (-0.914403385879010,-0.291589669511254)
+ (-6.527982609956444E-002,-0.143992607323247)
+ (5.359467997311574E-002,9.868972383751852E-002)
+ Sum fctQ =   0.958765465444562     
+      27    127.23450       1.48037681454406E-22
+      27    127.23450       5.50586895617493E-10
+ tn =           27 Elapsed CPU time =    16.4104100000000     
+  ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
+  dimQ                     3
+ calling propagation, tn=          27 /          30
+ fctQ(          27 ) (0.766373390597896,-0.571018288461989)
+ (0.141508943267394,-7.474196904490626E-002)
+ (-0.113738510530344,8.650648780342587E-002)
+ Sum fctQ =   0.959421023745685     
+      28    131.94689       1.59611504278134E-22
+      28    131.94689       5.49716792771600E-09
+ tn =           28 Elapsed CPU time =    17.7102370000000     
+  ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
+  dimQ                     3
+ calling propagation, tn=          28 /          30
+ fctQ(          28 ) (1.809288823650796E-002,0.959805427399809)
+ (8.292360246510018E-002,0.136400826466778)
+ (-7.856289538796241E-002,-7.694960577337319E-002)
+ Sum fctQ =   0.959128690737896     
+      29    136.65928       1.45908827012421E-22
+      29    136.65928       8.84406463429361E-09
+ tn =           29 Elapsed CPU time =    19.0607300000000     
+  ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
+  dimQ                     3
+ calling propagation, tn=          29 /          30
+ fctQ(          29 ) (-0.800180983203988,-0.540700781360890)
+ (-0.132480925614230,8.905230853272043E-002)
+ (1.094209034812634E-002,-2.967340972187248E-002)
+ Sum fctQ =   0.959128690737897     
+      30    141.37167       5.71336640726167E-45
+      30    141.37167       5.25996380637581E-09
+ tn =           30 Elapsed CPU time =    20.4617880000000     
+  ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
+  dimQ                     3
+ calling propagation, tn=          30 /          30
+ fctQ(          30 ) (0.899870658744410,-0.345688312439851)
+ (-9.499604748294467E-002,-0.128285853737767)
+ (-4.008102594440009E-002,-5.266005092972897E-002)
+ Sum fctQ =   0.959128690737897     
+      31    146.08406       4.72551554384896E-46
+      31    146.08406       4.35050703128731E-10
+ Iflg2           1
