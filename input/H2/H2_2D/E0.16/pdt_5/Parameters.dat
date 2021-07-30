@@ -30,8 +30,8 @@ axe KY     -3.11 a      3.11  dky= 0.622E-01 nky= 100
 axe KZ     -3.11 a      3.11  dkz= 0.622E-01 nkz= 100
  
 TIME GRID
-Number of time steps   30
- Timestep   1.18179033990839       a.u.
+Number of time steps   15
+ Timestep   2.44799427552451       a.u.
  
  
 Read basis set and parameters from columbus: Done

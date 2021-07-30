@@ -15,9 +15,9 @@ use observable
 
 contains
 
-!****************************************************************************************
-!****************************************************************************************
-subroutine new_dyna(fctQ,fctP,Upp,muEPS,muEPS_Sq,sauvChamp,matA,eps,cEta,cZeta,&
+    !****************************************************************************************
+    !****************************************************************************************
+    subroutine new_dyna(fctQ,fctP,Upp,muEPS,muEPS_Sq,sauvChamp,matA,eps,cEta,cZeta,&
 lmn_vec,prim_center,lcCG,Ers,H0qq,H0pp,MUqq,MUpp)   ! ,matAlpha,matPhi
 !Actual electron dynamics calculations:  Many-electron wavepacket in TDCI form, 
 ! Full Gaussian version 
@@ -315,7 +315,7 @@ Complex(kind=comp_16),allocatable, Dimension(:)     ::  P_J_Ion_amplitude
 
 real(kind=real_8)                                  ::seuil, sumfctQ !TODO to be deleted after test
 
-    Character(len=5)                    ::nom
+Character(len=5)                    ::nom
 !    Character(len=23)                   ::canal
 !    CHARACTER(LEN=20) :: FMT
 
