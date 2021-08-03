@@ -1,0 +1,50 @@
+&grille
+basis_file='H2_R_1_40'
+nq= 1
+inR= 1
+job= 'test_H2'
+QCsoft=0
+/
+&planewaves
+nx= 1			!Number of points for the X axis in both the spacial and momentum spaces
+xmin= 0		        !Minimal value in the X axis
+ny= 100			!Number of points for the Y axis in both the spacial and momentum spaces
+ymin=  -50		!Minimal value in the Y axis
+
+nz= 100		!Number of points for the Z axis in both the spacial and momentum spaces
+zmin= -50		!Minimal value in the Z axis
+/
+&drt
+Ne= 2			!Number of electrons
+Norb_cat= 2		!Number of active orbitals(in the Q_0 subspace)
+Norb_sym= 1		!Number of symbolic orbitals(for ionisation)
+FC= 0			!Number of frozen cores
+S= 0.d0			!Total spin of the system
+restriction=.TRUE.	!Restrict to single ionisation
+/
+&champ
+E0= 1.6d-1		!Laser intensity(a.u.)
+omega= 0.55		!Laser frequency(a.u.) 
+delta= 1.5E+000		!Laser phase(units of pi)
+theta= 0.0d0		!Angle from the Z axis to polarisation(units of pi)
+phy= 0.0d0		!Angle between sin(theta) and the X axis(units of pi)
+pulsed= .TRUE.		!The form of the pulse
+nper= 3			!Number of optic cycles
+pdt= 10		!Number of timesteps per optic cycle 
+tmin=0.d0		!Initial time
+harmonic=1
+/
+&prim_spec
+lp=3,1,2
+ld=1,2,3,4,5,6
+/
+&control_flags
+Iflg1=1
+Iflg2=1
+/
+&matrix_reordering_dim
+reorder_size=10         !Number of orbitals present on vector_array.nml
+
+
+
+
