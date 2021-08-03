@@ -341,6 +341,10 @@ muEPS_r_gam=dcmplx(0.d0,0.d0)
 
 
 call Get_muEPS_r_gam(Upp,muEPS,muEPS_r_gam,lcCG,matA,eps,cEta,cZeta,lmn_vec,prim_center,Volkov_OM_mat,fctP,Ers) !,matAlpha,matPhi
+write(*,*) "----------------------------------------------------"
+write(*,*) "muEPS_r_gamma in new_propagation :"
+write(*,*) muEPS_r_gamma
+write(*,*) "----------------------------------------------------"
 
  CI1=dcmplx(0.d0,0.d0); CI2=dcmplx(0.d0,0.d0); CI3=dcmplx(0.d0,0.d0)
  CI4=dcmplx(0.d0,0.d0); CI5=dcmplx(0.d0,0.d0); CI=dcmplx(0.d0,0.d0)
@@ -351,6 +355,8 @@ do i=1,dimQ
 	do j=1,dimP 
 		do r=1,orb_Q
 			CI1(i) = CI1(i) + muEPS_r_gam(r,j)*Ers(i ,j+dimQ,r,Norb) !  muEPS_r_gam(orb_Q,dimP) calculé par Get_muEPS_r_gam
+                        write(*,*) "-------------------------------------------------------------------------------"
+                        write(*,*) "i = ",i,"/dimQ, j = ",j,"/dimP, r = ",r,"/orb_Q, CI1=", CI1(i),", muEPS_r_gam(r,j) = ",muEPS_r_gam(r,j),",Ers(i ,j+dimQ,r,Norb) = ",Ers(i ,j+dimQ,r,Norb)
 		end do
 	end do
 end do
@@ -384,6 +390,10 @@ do j=1,dimP
 		end do
 end do
 call gemm(Upp(tn,:,:),gamm2,fctP(:,:,tn+1)) !nouvelle Etape13(a)
+write(*,*) "-------------------------------------------------------------------------------"
+write(*,*) "fctP(:,:,tn+1=",tn+1,") in new_propagation ):"
+write(*,*) fctP(:,:,tn+1)
+write(*,*) "-------------------------------------------------------------------------------"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Propagation within P-space: Done
@@ -618,11 +628,20 @@ do r=1,orb_Q
   do tnn=2,tn 
     call Volkov_OM(tn,tnn-1,lcCG,matA,eps,cEta,cZeta,lmn_vec,prim_center,muEPS,gamm2)  !,matAlpha,matPhi
       Volkov_OM_mat(tn,tnn-1,:,:)=gamm2
+      write(*,*) "------------------------------------------------"
+      write(*,*) "Volkov_OM_mat(tn=",tn,",tnn-1=",tnn-1,",:,:) in Get_muEPS_r_gam"
+      write(*,*) Volkov_OM_mat(tn,tnn-1,:,:)
+      write(*,*) "------------------------------------------------"
     temp=fctP(:,s,tnn)  
       if(tnn.lt.tn)then
       do nn=tnn,tn-1
        call gemv(Upp(nn,:,:),temp,temp2)
        temp = temp2
+      write(*,*) "------------------------------------------------"
+      write(*,*) "Volkov_OM_mat(tn=",tn,",tnn-1=",tnn-1,",:,:) in Get_muEPS_r_gam (2)"
+      write(*,*) Volkov_OM_mat(tn,tnn-1,:,:)
+      write(*,*) "------------------------------------------------"
+    temp=fctP(:,s,tnn)  
       end do
      endif
   muEPS_r_gam(r,j)=muEPS_r_gam(r,j)+temp(j)*matA(tnn-1)*Volkov_OM_mat(tn,tnn-1,r,s)
@@ -630,6 +649,8 @@ do r=1,orb_Q
  end do
 end do
 end do
+write(*,*)"-------------------------------------------------"
+write(*,*)"In Get_muEPS_r_gam, matA(tn) = ",matA(tn),"muEPS_r_gam = ",muEPS_r_gam
 muEPS_r_gam=matA(tn)*muEPS_r_gam
 endif
 
@@ -756,8 +777,8 @@ Integer(kind=int_4), Intent(in)::tn,tnn
 Integer(kind=int_4) :: i,j,k,n,nn
 
 
-if(tnn.lt.tn) then
 A_nl=0.d0; Alpha_nl=0.d0; Phi_nl=0.d0
+if(tnn.lt.tn) then
 do i=tnn,tn-1
    A_nl= A_nl+ matA(i)
    Alpha_nl=Alpha_nl+A_nl !Alpha_nl=Alpha_nl+(tn-1-i)*matA(i)

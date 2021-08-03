@@ -1,0 +1,42 @@
+src/all_v001/nouveaudrt.f90(456): warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.   [S]
+subroutine gen_bielect(dimCSF,Norb,Ersmp,Ers,tabDRT,chemin,Ne,S)
+--------------------------------------------------------------^
+ifort -I/opt/intel/oneapi/mkl/2021.1.1/env/../include/intel64/lp64/ -nogen-interface -fpe0 -g -traceback -debug extended -heap-arrays -fp-stack-check -debug all -qopenmp  -g -c -o src/all_v001/medys-read_gamess.o `test -f 'src/all_v001/read_gamess.f90' || echo './'`src/all_v001/read_gamess.f90
+src/all_v001/read_gamess.f90(125): warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.   [LCAO]
+subroutine read_coeff_lcao_gamess(lcao,norb,basis_file)
+----------------------------------^
+src/all_v001/read_gamess.f90(148): warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.   [SO]
+subroutine read_integrals_gamess(SO,T1,V1,mu,mux,muy,vee,norb,basis_file)
+---------------------------------^
+src/all_v001/read_gamess.f90(148): warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.   [T1]
+subroutine read_integrals_gamess(SO,T1,V1,mu,mux,muy,vee,norb,basis_file)
+------------------------------------^
+src/all_v001/read_gamess.f90(148): warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.   [V1]
+subroutine read_integrals_gamess(SO,T1,V1,mu,mux,muy,vee,norb,basis_file)
+---------------------------------------^
+src/all_v001/read_gamess.f90(148): warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.   [MU]
+subroutine read_integrals_gamess(SO,T1,V1,mu,mux,muy,vee,norb,basis_file)
+------------------------------------------^
+src/all_v001/read_gamess.f90(148): warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.   [MUX]
+subroutine read_integrals_gamess(SO,T1,V1,mu,mux,muy,vee,norb,basis_file)
+---------------------------------------------^
+src/all_v001/read_gamess.f90(148): warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.   [MUY]
+subroutine read_integrals_gamess(SO,T1,V1,mu,mux,muy,vee,norb,basis_file)
+-------------------------------------------------^
+src/all_v001/read_gamess.f90(148): warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.   [VEE]
+subroutine read_integrals_gamess(SO,T1,V1,mu,mux,muy,vee,norb,basis_file)
+-----------------------------------------------------^
+ifort -I/opt/intel/oneapi/mkl/2021.1.1/env/../include/intel64/lp64/ -nogen-interface -fpe0 -g -traceback -debug extended -heap-arrays -fp-stack-check -debug all -qopenmp  -g -c -o src/all_v001/medys-dynamique_new.o `test -f 'src/all_v001/dynamique_new.f90' || echo './'`src/all_v001/dynamique_new.f90
+src/all_v001/dynamique_new.f90(233): warning #6075: The data type of the actual argument does not match the definition.   [DIMQ]
+temp3=ZidentiMAT(dimQ) + ((1.d0/4.d0)*Hqppq*(Int0()**2))
+-----------------^
+src/all_v001/dynamique_new.f90(260): warning #6075: The data type of the actual argument does not match the definition.   [DIMQ]
+Mat33=ZidentiMAT(dimQ) - ((1.d0/4.d0)*Hqppq* (Int0()**2))
+-----------------^
+src/all_v001/dynamique_new.f90(326): warning #6075: The data type of the actual argument does not match the definition.   [DIMQ]
+call Udiag(H0qq,MUqq,dimQ,Uqq,delta)
+---------------------^
+src/all_v001/dynamique_new.f90(505): warning #6075: The data type of the actual argument does not match the definition.   [LDA]
+ call Diagonalize(tempMat,lda,evec,eval)
+--------------------------^
+
