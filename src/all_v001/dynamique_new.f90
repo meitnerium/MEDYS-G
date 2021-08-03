@@ -622,7 +622,7 @@ Real(kind=real_8),  Dimension(:,:,:,:),Intent(in) 	:: Ers
 
 complex(kind=comp_16),allocatable,dimension(:,:)     :: gamm2 !CI1,CI2,CI3,CI4,CI5,CI
 complex(kind=comp_16), dimension(:,:),Intent(inout)   ::muEPS_r_gam !,gammCorrection
-complex(kind=comp_16), dimension(:,:,:,:),Intent(inout)	   ::Volkov_OM_mat
+complex(kind=comp_16), dimension(:,:,:,:),Intent(inout)   ::Volkov_OM_mat
 complex(kind=comp_16), dimension(dimP)	   ::temp, temp2
 integer						                       :: nn,j,r,s,tnn
 
@@ -632,6 +632,7 @@ do j=1,dimP
 do r=1,orb_Q
  do s=1,orb_Q
   do tnn=2,tn 
+    gamm2=0.d0
     call Volkov_OM(tn,tnn-1,lcCG,matA,eps,cEta,cZeta,lmn_vec,prim_center,muEPS,gamm2)  !,matAlpha,matPhi
       Volkov_OM_mat(tn,tnn-1,:,:)=gamm2
       write(*,*) "------------------------------------------------"
@@ -677,6 +678,7 @@ Real(kind=real_8), dimension(:),Intent(in)::  cZeta,eps
 !Integer(kind=int_4),allocatable,dimension(:,:),Intent(in)::prim_lmn
 Integer(kind=int_4), dimension(:,:),Intent(in):: lmn_vec
 complex(kind=comp_16), dimension(:,:),Intent(out)	   ::Volkov_OM_mat_res
+complex(kind=comp_16), dimension(:,:),allocatable	   ::localVolkov_OM_mat
 complex(kind=comp_16),allocatable,dimension(:,:,:,:) 	   ::GMutG 
 Complex(kind=comp_16), Dimension(:,:),Intent(in) 	:: muEPS
 !Complex(kind=comp_16), Dimension(: ) 	:: temp
@@ -687,6 +689,8 @@ integer                       :: j,r,s,ss
 
 allocate(temp(orb_Q,totPrimCount), temp2(orb_Q,orb_Q),GMutG(totPrimCount,totPrimCount,1,1)) !,Volkov_OM_mat_res(orb_Q,orb_Q)
 allocate(temp3(orb_Q,orb_Q))
+allocate(localVolkov_OM_mat(orb_Q,orb_Q))
+localVolkov_OM_mat=0.d0
 !***************
 call Get_GMutG(tn,tnn,matA,eps,cEta,cZeta,lmn_vec,prim_center,GMutG)! ,matAlpha,matPhi
 
@@ -698,11 +702,11 @@ temp2=matmul(temp,transpose(lcCG))
 temp=matmul(lcCG,GMutG(:,:,0,1))  !! for <G1|d^0 (U_volkov) d |G2>
 temp3=matmul(temp,transpose(lcCG))
 temp=matmul(muEPS,temp3)
-Volkov_OM_mat_res=temp2-temp-conjg(transpose(temp))
+localVolkov_OM_mat=temp2-temp-conjg(transpose(temp))
 temp=matmul(lcCG,GMutG(:,:,0,0)) !! for <G1|d^0 (U_volkov) d^0  |G2>
 temp3=matmul(temp,transpose(lcCG)) 
 temp2=matmul(muEPS,temp3)
-Volkov_OM_mat_res=Volkov_OM_mat_res+matmul(temp2, muEPS)
+Volkov_OM_mat_res=localVolkov_OM_mat+matmul(temp2, muEPS)
 
 end subroutine Volkov_OM
 !***************************************************

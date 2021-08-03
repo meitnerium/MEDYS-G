@@ -70,7 +70,7 @@ Number atomic orbitals to be construc 10
  Debut dynamique
  Debut dynamique
           15 number of timesteps
- tn =            1 Elapsed CPU time =   1.919999999999977E-004
+ tn =            1 Elapsed CPU time =   3.939999999999916E-004
   ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
   dimQ                     3
  calling propagation, tn=           1 /          15
@@ -154,7 +154,7 @@ Number atomic orbitals to be construc 10
  -------------------------------------------------------------------------------
       02      9.42478       1.03617115519889E-18
       02      9.42478       4.85996938762871E-09
- tn =            2 Elapsed CPU time =   1.487999999999996E-003
+ tn =            2 Elapsed CPU time =   2.235000000000001E-003
   ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
   dimQ                     3
  calling propagation, tn=           2 /          15
@@ -282,7 +282,7 @@ Number atomic orbitals to be construc 10
  -------------------------------------------------------------------------------
       03     14.13717       1.59437336366406E-05
       03     14.13717       1.29566177038186E+00
- tn =            3 Elapsed CPU time =   6.943099999999999E-002
+ tn =            3 Elapsed CPU time =   5.589300000000000E-002
   ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
   dimQ                     3
  calling propagation, tn=           3 /          15
@@ -486,7 +486,7 @@ Number atomic orbitals to be construc 10
  -------------------------------------------------------------------------------
       04     18.84956       1.83988215770347E+02
       04     18.84956       2.87442745688546E+06
- tn =            4 Elapsed CPU time =   0.204706000000000     
+ tn =            4 Elapsed CPU time =   0.162578000000000     
   ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
   dimQ                     3
  calling propagation, tn=           4 /          15
@@ -810,7 +810,7 @@ Number atomic orbitals to be construc 10
  -------------------------------------------------------------------------------
       05     23.56194       2.01944318038719E+08
       05     23.56194       3.92968171213735E+11
- tn =            5 Elapsed CPU time =   0.407863000000000     
+ tn =            5 Elapsed CPU time =   0.315621000000000     
   ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
   dimQ                     3
  calling propagation, tn=           5 /          15
@@ -1294,7 +1294,7 @@ Number atomic orbitals to be construc 10
  -------------------------------------------------------------------------------
       06     28.27433       8.97189118370552E+14
       06     28.27433       1.90399498988935E+17
- tn =            6 Elapsed CPU time =   0.679326000000000     
+ tn =            6 Elapsed CPU time =   0.522759000000000     
   ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
   dimQ                     3
  calling propagation, tn=           6 /          15
@@ -1978,7 +1978,7 @@ Number atomic orbitals to be construc 10
  -------------------------------------------------------------------------------
       07     32.98672       2.89494472085495E+19
       07     32.98672       5.09448093218627E+22
- tn =            7 Elapsed CPU time =   0.972061000000000     
+ tn =            7 Elapsed CPU time =   0.784248000000000     
   ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
   dimQ                     3
  calling propagation, tn=           7 /          15
@@ -2902,7 +2902,7 @@ Number atomic orbitals to be construc 10
  -------------------------------------------------------------------------------
       08     37.69911       1.11228845307816E+30
       08     37.69911       7.06908645735108E+31
- tn =            8 Elapsed CPU time =    1.27876800000000     
+ tn =            8 Elapsed CPU time =    1.10500900000000     
   ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
   dimQ                     3
  calling propagation, tn=           8 /          15
@@ -4106,7 +4106,7 @@ Number atomic orbitals to be construc 10
  -------------------------------------------------------------------------------
       09     42.41150       5.48138723521381E+34
       09     42.41150       8.55205380202519E+37
- tn =            9 Elapsed CPU time =    1.63772400000000     
+ tn =            9 Elapsed CPU time =    1.48084500000000     
   ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
   dimQ                     3
  calling propagation, tn=           9 /          15
@@ -5630,7 +5630,7 @@ Number atomic orbitals to be construc 10
  -------------------------------------------------------------------------------
       10     47.12389       2.62708448517517E+45
       10     47.12389       4.98063492838236E+47
- tn =           10 Elapsed CPU time =    2.04922000000000     
+ tn =           10 Elapsed CPU time =    1.91135900000000     
   ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
   dimQ                     3
  calling propagation, tn=          10 /          15
@@ -7517,7 +7517,7 @@ Number atomic orbitals to be construc 10
  -------------------------------------------------------------------------------
       11     51.83628       5.75551621507956E+50
       11     51.83628       4.47597550385282E+53
- tn =           11 Elapsed CPU time =    2.51378000000000     
+ tn =           11 Elapsed CPU time =    2.40007900000000     
   ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
   dimQ                     3
  calling propagation, tn=          11 /          15
@@ -9807,7 +9807,7 @@ Number atomic orbitals to be construc 10
  -------------------------------------------------------------------------------
       12     56.54867       2.72016651662112E+58
       12     56.54867       1.29889756425620E+62
- tn =           12 Elapsed CPU time =    3.03156100000000     
+ tn =           12 Elapsed CPU time =    2.94034000000000     
   ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
   dimQ                     3
  calling propagation, tn=          12 /          15
@@ -12537,7 +12537,7 @@ Number atomic orbitals to be construc 10
  -------------------------------------------------------------------------------
       13     61.26106       3.30095876368225E+68
       13     61.26106       1.05091857410601E+73
- tn =           13 Elapsed CPU time =    3.60307200000000     
+ tn =           13 Elapsed CPU time =    3.53899100000000     
   ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
   dimQ                     3
  calling propagation, tn=          13 /          15
@@ -15747,7 +15747,7 @@ Number atomic orbitals to be construc 10
  -------------------------------------------------------------------------------
       14     65.97345       7.85930758878813E+68
       14     65.97345       1.94947456237202E+76
- tn =           14 Elapsed CPU time =    4.22837500000000     
+ tn =           14 Elapsed CPU time =    4.19214200000000     
   ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
   dimQ                     3
  calling propagation, tn=          14 /          15
@@ -19477,7 +19477,7 @@ Number atomic orbitals to be construc 10
  -------------------------------------------------------------------------------
       15     70.68583       2.19234017402346E+43
       15     70.68583       1.15785513002757E+77
- tn =           15 Elapsed CPU time =    4.90805900000000     
+ tn =           15 Elapsed CPU time =    4.89739500000000     
   ZGETRI(dimQ,Inv33,dimQ,ipiv,WORK,lwork,INFO)
   dimQ                     3
  calling propagation, tn=          15 /          15
