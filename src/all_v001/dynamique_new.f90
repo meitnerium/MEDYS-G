@@ -603,9 +603,127 @@ end subroutine EigenVectors
 !
 !end subroutine CSF2States
 
-!*******************************************
-!*******************************************
+
+
+
+
+
+
+
+
+
+
+
+
 subroutine Get_muEPS_r_gam(Upp,muEPS,muEPS_r_gam,lcCG,matA,eps,cEta,cZeta,lmn_vec,prim_center,Volkov_OM_mat,fctP,Ers) !,matAlpha,matPhi
+!*******************************************
+!*******************************************
+complex(kind=comp_16),dimension(:,:,:),intent(in) :: fctP,Upp
+Complex(kind=comp_16), Dimension(:,:),Intent(in) :: muEPS
+
+Real(kind=real_8),  Dimension(:),Intent(inout) :: matA
+! Real(kind=real_8), dimension(:,:),Intent(inout):: matAlpha, matPhi
+
+Real(kind=real_8), dimension(:,:),Intent(in) :: cEta,   lcCG, prim_center
+Real(kind=real_8), dimension(:),Intent(in)::  cZeta, eps
+!Integer(kind=int_4),allocatable,dimension(:,:),Intent(in)::prim_lmn
+Integer(kind=int_4), dimension(:,:),Intent(in):: lmn_vec
+Real(kind=real_8),  Dimension(:,:,:,:),Intent(in) :: Ers
+
+complex(kind=comp_16),allocatable,dimension(:,:)     :: gamm2 !CI1,CI2,CI3,CI4,CI5,CI
+complex(kind=comp_16), dimension(:,:),Intent(inout)   ::muEPS_r_gam !,gammCorrection
+complex(kind=comp_16), dimension(:,:,:,:),Intent(inout)   ::Volkov_OM_mat
+complex(kind=comp_16), dimension(dimP)   ::temp, temp2
+integer                       :: nn,j,r,s,tnn
+
+allocate(gamm2(orb_Q,orb_Q))
+if(tn.ge.2)then
+
+
+do tnn=2,tn
+    call Volkov_OM(tn,tnn-1,lcCG,matA,eps,cEta,cZeta,lmn_vec,prim_center,muEPS,gamm2)  !,matAlpha,matPhi
+      Volkov_OM_mat(tn,tnn-1,:,:)=gamm2
+      write(*,*) "------------------------------------------------"
+      write(*,*) "Volkov_OM_mat(tn=",tn,",tnn-1=",tnn-1,",:,:) in Get_muEPS_r_gam"
+      write(*,*) Volkov_OM_mat(tn,tnn-1,:,:)
+      write(*,*) "------------------------------------------------"
+  do s=1,orb_Q
+    temp=fctP(:,s,tnn) 
+
+!! write temp ici ???
+      if(tnn.lt.tn)then
+      do nn=tnn,tn-1
+       call gemv(Upp(nn,:,:),temp,temp2)
+              temp = temp2
+      end do
+!! write temp ici ???
+     endif
+    do j=1,dimP      
+     do r=1,orb_Q
+!
+       muEPS_r_gam(r,j)=muEPS_r_gam(r,j)+temp(j)*matA(tnn-1)*Volkov_OM_mat(tn,tnn-1,r,s)
+     end do
+    end do
+  enddo
+end do
+write(*,*)"-------------------------------------------------"
+write(*,*)"In Get_muEPS_r_gam, matA(tn) = ",matA(tn),"muEPS_r_gam = ",muEPS_r_gam
+muEPS_r_gam=matA(tn)*muEPS_r_gam
+endif
+
+end subroutine Get_muEPS_r_gam
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+!*******************************************
+!*******************************************
+subroutine Get_muEPS_r_gam_old(Upp,muEPS,muEPS_r_gam,lcCG,matA,eps,cEta,cZeta,lmn_vec,prim_center,Volkov_OM_mat,fctP,Ers) !,matAlpha,matPhi
 !*******************************************
 !*******************************************
 complex(kind=comp_16),dimension(:,:,:),intent(in) :: fctP,Upp
@@ -661,7 +779,7 @@ write(*,*)"In Get_muEPS_r_gam, matA(tn) = ",matA(tn),"muEPS_r_gam = ",muEPS_r_ga
 muEPS_r_gam=matA(tn)*muEPS_r_gam
 endif
 
-end subroutine Get_muEPS_r_gam
+end subroutine Get_muEPS_r_gam_old
 
 !***************************************************
 
