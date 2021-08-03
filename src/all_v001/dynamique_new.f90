@@ -77,7 +77,11 @@ open(51,file='champ.dat',status='unknown',form='formatted')
 !////////////////////////////////////////////////////////
 
 call Volkov_OM(1,1,lcCG,matA,eps,cEta,cZeta,lmn_vec,prim_center,muEPS,muEPS_Sq)!,matAlpha,matPhi ! Volkov_OM called at the start, to calculate matrix elements of the type 
-                                                                                                !   <r|d(1-q)d|s> = <r|d(1-q)u_volk(0) (1-q)d|s>
+write(*,*) "----------------------------------"                                                                                                !   <r|d(1-q)d|s> = <r|d(1-q)u_volk(0) (1-q)d|s>
+write(*,*) "muEPS_Sq in new_dyna (at begining)"     
+write(*,*) muEPS_Sq
+write(*,*) "----------------------------------"                                                                                                !   <r|d(1-q)d|s> = <r|d(1-q)u_volk(0) (1-q)d|s>
+
 call Hqppq_CSF(muEPS_Sq,Ers,Hqppq) 
 
 call cpu_time ( t1 )
