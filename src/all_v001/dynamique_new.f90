@@ -302,7 +302,7 @@ Integer(kind=int_4), dimension(:,:),Intent(in):: lmn_vec
 Real(kind=real_8),  Dimension(:,:,:,:),Intent(in) 	:: Ers
 
 complex(kind=comp_16),allocatable,dimension(:)     ::CI1,CI2,CI3,CI4,CI5,CI
-complex(kind=comp_16),allocatable,dimension(:,:)   ::muEPS_r_gam,Uqq  , gamm2!,gammCorrection
+complex(kind=comp_16),allocatable,dimension(:,:)   :: muEPS_r_gam,Uqq  , gamm2!,gammCorrection
 !complex(kind=comp_16),allocatable,dimension(:,:,:)   ::Upp
 complex(kind=comp_16),dimension(:,:,:,:)	   ::Volkov_OM_mat
 
@@ -342,8 +342,14 @@ muEPS_r_gam=dcmplx(0.d0,0.d0)
 
 call Get_muEPS_r_gam(Upp,muEPS,muEPS_r_gam,lcCG,matA,eps,cEta,cZeta,lmn_vec,prim_center,Volkov_OM_mat,fctP,Ers) !,matAlpha,matPhi
 write(*,*) "----------------------------------------------------"
-write(*,*) "muEPS_r_gamma in new_propagation :"
-write(*,*) muEPS_r_gamma
+write(*,*) "muEPS_r_gam in new_propagation :"
+write(*,*) muEPS_r_gam
+!for i=1,orb_Q
+!  for j=1,dimP
+!    write(*,*) "muEPS_r_gamma(i="i",j="j")"
+!    write(*,*) muEPS_r_gamma(i,j)
+!  end do
+!end do
 write(*,*) "----------------------------------------------------"
 
  CI1=dcmplx(0.d0,0.d0); CI2=dcmplx(0.d0,0.d0); CI3=dcmplx(0.d0,0.d0)
