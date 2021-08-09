@@ -2782,7 +2782,7 @@ case(1)     ! J est une orbitale s centree sur IS
        counter3=counter3+1  ! (compte les primitives)
        cEta(counter2,counter3)=ETA(I,counter1)
        cZeta(counter3)=ZET(I,counter1) !todo: verifier ZET ou ZETA
-       prim_center(counter3,:)=coord(counter1,:)
+       prim_center(counter3,:)=coord(IS,:)
        enddo
 
 !
@@ -2794,7 +2794,10 @@ case(2)     ! J est une orbitale p centree sur IS
        counter3=counter3+1  ! (compte les primitives) 
        cEta(counter2,counter3)=ETA(I,counter1)
        cZeta(counter3)=ZET(I,counter1) !todo: verifier ZET ou ZETA
-       prim_center(counter3,:)=coord(counter1,:)
+       prim_center(counter3,:)=coord(IS,:)
+       write(*,*) "In read_columbus, IS = ",IS
+       write(*,*) "In read_columbus, coord(counter1,:) = ",coord(IS,:)
+       
           
           select case (lp(m))
           case (1)
@@ -2816,7 +2819,7 @@ case(3)     ! J est une orbitale d centree sur IS
        counter3=counter3+1  ! (compte les primitives) 
        cEta(counter2,counter3)=ETA(I,counter1)
        cZeta(counter3)=ZET(I,counter1) !todo: verifier ZET ou ZETA
-       prim_center(counter3,:)=coord(counter1,:)
+       prim_center(counter3,:)=coord(IS,:)
           
           select case (ld(m))
           case (1)
