@@ -809,7 +809,7 @@ contains
         Integer(kind = int_4), Intent(in) :: tn, tnn
         integer :: j, r, s, ss
 
-        allocate(temp(orb_Q, totPrimCount), temp2(orb_Q, orb_Q), GMutG(totPrimCount, totPrimCount, 1, 1)) !,Volkov_OM_mat_res(orb_Q,orb_Q)
+        allocate(temp(orb_Q, totPrimCount), temp2(orb_Q, orb_Q), GMutG(totPrimCount, totPrimCount, 0:1, 0:1)) !,Volkov_OM_mat_res(orb_Q,orb_Q)
         allocate(temp3(orb_Q, orb_Q))
         allocate(localVolkov_OM_mat(orb_Q, orb_Q))
         localVolkov_OM_mat = 0.d0
@@ -846,6 +846,7 @@ contains
         Integer(kind = int_4), dimension(:,:), Intent(in) :: lmn_vec
         !complex(kind=comp_16), dimension(:,:,:,:),Intent(out)   ::Volkov_OM_mat
         complex(kind = comp_16), dimension(:,:,:,:) :: GMutG
+        complex(kind = comp_16), dimension(:,:,:,:), allocatable :: localGMutG
         !Complex(kind=comp_16), Dimension(:,:),Intent(in) :: muEPS
         !Complex(kind=comp_16), Dimension(: ) :: temp
         !Complex(kind=comp_16), Dimension(:,: ) :: temp,temp2!,GMutG 
@@ -853,7 +854,7 @@ contains
         Integer(kind = int_4), Intent(in) :: tn, tnn!totPrimCount 
         Integer(kind = int_4) :: i, j, k, r, s, kp, kpp, delt
 
-
+        allocate(localGMutG(totprimcount,totprimcount,0:1,0:1))
         delt = (tn - tnn)
         GMutG = dcmplx(0.d0, 0.d0)
 
@@ -884,15 +885,15 @@ contains
                         kpp = 2
                     end select
                     !
-                    GMutG(r, s, 1, 1) = GMutG(r, s, 1, 1) + eps(kp) * eps(kpp)*(gmu1dg10(kp) * gmu1dg01(kpp) + gmu1dg10(kpp) * gmu1dg01(kp)) * gmu1dg00(k)
-                    GMutG(r, s, 1, 1) = GMutG(r, s, 1, 1) + eps(k) * eps(k) * gmu1dg11(k) * gmu1dg00(kp) * gmu1dg00(kpp)
+                    localGMutG(r, s, 1, 1) = localGMutG(r, s, 1, 1) + eps(kp) * eps(kpp)*(gmu1dg10(kp) * gmu1dg01(kpp) + gmu1dg10(kpp) * gmu1dg01(kp)) * gmu1dg00(k)
+                    localGMutG(r, s, 1, 1) = localGMutG(r, s, 1, 1) + eps(k) * eps(k) * gmu1dg11(k) * gmu1dg00(kp) * gmu1dg00(kpp)
                     !
-                    GMutG(r, s, 0, 1) = GMutG(r, s, 0, 1) + eps(k) * gmu1dg01(k) * gmu1dg00(kp) * gmu1dg00(kpp)
+                    localGMutG(r, s, 0, 1) = localGMutG(r, s, 0, 1) + eps(k) * gmu1dg01(k) * gmu1dg00(kp) * gmu1dg00(kpp)
                 enddo
-                GMutG(r, s, 0, 0) = gmu1dg00(1) * gmu1dg00(2) * gmu1dg00(3)
+                localGMutG(r, s, 0, 0) = gmu1dg00(1) * gmu1dg00(2) * gmu1dg00(3)
             enddo
         enddo
-        GMutG = GMutG * cdexp(dcmplx(0.d0, -Phi))
+        GMutG = localGMutG * cdexp(dcmplx(0.d0, -Phi))
 
     end subroutine Get_GMutG
 
@@ -1384,7 +1385,7 @@ contains
         implicit none
         real(kind = real_8) :: Hermite
         real(kind = real_8), intent(in) :: kk
-        real(kind = real_8), dimension(10) :: A
+        real(kind = real_8), dimension(0:10) :: A
         integer, intent(in) :: n
         integer :: i
 
@@ -1410,8 +1411,8 @@ contains
         !*******************************************
         !******************************************* 
         integer i, j, n
-        real(kind = real_8), dimension(10), intent(inout) :: A
-        real(kind = real_8), dimension(10, 10) :: B
+        real(kind = real_8), dimension(0:10), intent(inout) :: A
+        real(kind = real_8), dimension(0:10, 0:10) :: B
         !write(*,*) "Begining of Hermite_Coeff"
         !Establish l0 and l1 coefficients
         B(0, 0) = 1.d0; B(1, 0) = 0.d0; B(1, 1) = 2.d0
