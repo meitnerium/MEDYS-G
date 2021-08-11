@@ -378,6 +378,7 @@ contains
 
         fctQ = CI !propagation of Q-part of wp done
         write(*, *) "fctQ(", tn, ")", fctQ
+        sumfctQ = 0.d0
         do j = 1, dimQ
             sumfctQ = sumfctQ + abs(fctQ(j))**2
         end do
