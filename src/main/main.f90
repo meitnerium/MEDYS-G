@@ -404,7 +404,9 @@ Write(50,'(A)')'Change of basis (from AO to MO) done'
 call PrimCount(NS,NF,ICONU, totPrimCount,LMNP1)
 allocate(cEta(norb_lect,totPrimCount),cZeta(totPrimCount),lmn_vec(totPrimCount,3), prim_center(totPrimCount,3),lcCG_temp(norb_lect,totPrimCount))
 call Join_Prim_Info(NS,ETA,ZET,NCONS,ICONU,NF,LMNP1,coord,cEta,cZeta,lmn_vec,prim_center,lcao,lcCG_temp,lp,ld,norb_lect)
- 
+
+  WRITE(*,*) 'lcao:' !JN ETA
+  WRITE(*,*) lcao !JN ETA
 
 !//////////////////////////////////////////////////////////////////////////////////////////////////
 !Restriction of integrals to active MO (+FC). New integral matrices dimensioned to orb_Q= Norb_cat + FC
@@ -554,7 +556,8 @@ write(*,*)'dimQ=',dimQ
 !Call dyna=actual dynamical calculation (Propagation of TD wavefunction through TD CI coefficients)
 !////////////////////////////////////////////////////////////////////////////////////////////////
 write(*,*) "dimQ", dimQ
-allocate(sauvChamp(nt+1),fctQ(dimQ),fctP(dimP,orb_Q, nt), Upp(nt,dimP,dimP), matA(nt),eMomentum_gam(dimP)) ! ,matAlpha(nt,nt),matPhi(nt,nt)
+!JN allocate(sauvChamp(nt+1),fctQ(dimQ),fctP(dimP,orb_Q, nt), Upp(nt,dimP,dimP), matA(nt),eMomentum_gam(dimP)) ! ,matAlpha(nt,nt),matPhi(nt,nt)
+allocate(sauvChamp(nt+1),fctQ(dimQ),fctP(dimP,orb_Q, nt+1), Upp(nt,dimP,dimP), matA(nt+1),eMomentum_gam(dimP)) !,matAlpha(nt,nt),matPhi(nt,nt) !JN
 !allocate(Hqp(dimQ,dimP*nk),Hpq(dimP*nk,dimQ))
 
 !todo: allocate muEPS_Sq in new_dyna and delete variable in main
