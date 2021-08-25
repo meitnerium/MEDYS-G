@@ -405,8 +405,7 @@ call PrimCount(NS,NF,ICONU, totPrimCount,LMNP1)
 allocate(cEta(norb_lect,totPrimCount),cZeta(totPrimCount),lmn_vec(totPrimCount,3), prim_center(totPrimCount,3),lcCG_temp(norb_lect,totPrimCount))
 call Join_Prim_Info(NS,ETA,ZET,NCONS,ICONU,NF,LMNP1,coord,cEta,cZeta,lmn_vec,prim_center,lcao,lcCG_temp,lp,ld,norb_lect)
 
-  WRITE(*,*) 'lcao:' !JN ETA
-  WRITE(*,*) lcao !JN ETA
+ 
 
 !//////////////////////////////////////////////////////////////////////////////////////////////////
 !Restriction of integrals to active MO (+FC). New integral matrices dimensioned to orb_Q= Norb_cat + FC

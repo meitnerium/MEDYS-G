@@ -2763,26 +2763,34 @@ Real(kind=real_8),dimension(:),Intent(inout)	::cZeta
 Integer(kind=int_4),dimension(:,:),Intent(inout)	:: lmn_vec
 Integer(kind=int_4),dimension(3)::lp
 Integer(kind=int_4),dimension(6)::ld
-
+Real(kind=real_8) temp
+Real(kind=real_8), Dimension(nMO,nMO) ::lcaoCon
  counter1=0
  counter2=0
  counter3=0
 lmn_vec=0
  Do IS=1,NS
-    
+!write(*,*)"L'atome No", IS, "porte", NF(IS), "types de OA"    
    Do J=1,NF(IS)
       counter1=counter1+1  ! counter1 compte les classes  d'OA 
+!write(*,*)"Le type No.", counter1, "est de nombre quantique",  LMNP1(counter1)
       select case (LMNP1(counter1))  !LMNP1 = 1,2,3 correspond à s,p,d
+
 !
 case(1)     ! J est une orbitale s centree sur IS
  
       counter2=counter2+1  ! (le numéro de cette OA est counter2)
+!write(*,*)"OA No.", counter2,"portee par atome No.", IS
+!write(*,*)"construit sur", ICONU(counter1), "primitives Gaussiennes dont"
 
        Do I=1, ICONU(counter1)
        counter3=counter3+1  ! (compte les primitives)
+!write(*,*)"la ",I,"ieme, positionee dans cEta,cZeta, .. , en", counter3
        cEta(counter2,counter3)=ETA(I,counter1)
        cZeta(counter3)=ZET(I,counter1) !todo: verifier ZET ou ZETA
        prim_center(counter3,:)=coord(IS,:)
+!write(*,*)" avec ETA=",cEta(counter2,counter3), "Zeta=",cZeta(counter3)
+!write(*,*)"centree en", prim_center(counter3,:)
        enddo
 
 !
@@ -2792,13 +2800,11 @@ case(2)     ! J est une orbitale p centree sur IS
          counter2=counter2+1  ! (le numéro de cette OA p_m est counter2)
        Do I=1, ICONU(counter1)
        counter3=counter3+1  ! (compte les primitives) 
+
        cEta(counter2,counter3)=ETA(I,counter1)
        cZeta(counter3)=ZET(I,counter1) !todo: verifier ZET ou ZETA
        prim_center(counter3,:)=coord(IS,:)
-       write(*,*) "In read_columbus, IS = ",IS
-       write(*,*) "In read_columbus, coord(counter1,:) = ",coord(IS,:)
        
-          
           select case (lp(m))
           case (1)
            lmn_vec(counter3,1)=1
@@ -2815,12 +2821,14 @@ case(3)     ! J est une orbitale d centree sur IS
       
       do m=1,6
          counter2=counter2+1  ! (le numéro de cette OA d_m est counter2)
+
        Do I=1, ICONU(counter1)
        counter3=counter3+1  ! (compte les primitives) 
+
        cEta(counter2,counter3)=ETA(I,counter1)
        cZeta(counter3)=ZET(I,counter1) !todo: verifier ZET ou ZETA
        prim_center(counter3,:)=coord(IS,:)
-          
+         
           select case (ld(m))
           case (1)
            lmn_vec(counter3,1)=2
@@ -2849,8 +2857,26 @@ case(3)     ! J est une orbitale d centree sur IS
 !call gemm(lcao,cEta,lcCG)
 !
 ! should be
-call gemm(transpose(lcao),cEta,lcCG)
+lcaoCon=transpose(lcao)
+call gemm(lcaoCon,cEta,lcCG)
 !
+!write(*,*)"test lcCG"
+!write(*,*)"counter2=",counter2, "Norb_lect=", nMO, "counter3=",counter3
+
+!do i=1,2
+ !write(*,*)"lcao  coeff for MO number ",i
+ !write(*,*) lcao(:,i)
+ !write(*,*)"CG expansion coeffs for AO number ",i
+ !write(*,*)cEta(i,:)
+ !do j=1,counter3
+!temp=0.d0
+  !do k=1,counter2
+   !temp=temp+lcao(k,i)*cEta(k,j)
+  !enddo
+  !write(*,*) "compare Sum_k[lcao(k,i)*cEta(k,j)] with lcCG(i,j), j=", j,"i=", i
+  !write(*,*) temp, lcCG(i,j)
+ !enddo
+!enddo
 
 end subroutine Join_Prim_Info
 

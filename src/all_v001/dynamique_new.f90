@@ -84,6 +84,9 @@ contains
 
         call Hqppq_CSF(muEPS_Sq, Ers, Hqppq)
 
+  WRITE(*,*) 'Hqppq:' !JN
+  WRITE(*,*) Hqppq !JN
+
         call cpu_time(t1)
 
         do j = 1, dimP
@@ -830,13 +833,29 @@ contains
         temp = matmul(lcCG, GMutG(:,:, 0, 1)) !! for <G1|d^0 (U_volkov) d |G2>
         temp3 = matmul(temp, transpose(lcCG))
         temp = matmul(muEPS, temp3)
-        localVolkov_OM_mat = temp2 - temp - conjg(transpose(temp))
+        localVolkov_OM_mat = temp2 - temp  !- conjg(transpose(temp))
+                 if(tnn.eq.tn)then
+                    write(*,*)"tn=",tn
+                    write(*,*)"temp2=", temp2
+     	            write(*,*) "temp=", temp
+                 endif
+!
+        temp = matmul(lcCG, GMutG(:,:, 1, 0)) !! for <G1|d^0 (U_volkov) d |G2>
+        temp3 = matmul(temp, transpose(lcCG))
+        temp = matmul(temp3,muEPS)
+                 if(tnn.eq.tn)then
+                    write(*,*)"temp=", temp
+                    write(*,*)"muEPS=", muEPS 
+                 endif
+
+!
+        localVolkov_OM_mat =localVolkov_OM_mat -temp
         temp = matmul(lcCG, GMutG(:,:, 0, 0)) !! for <G1|d^0 (U_volkov) d^0  |G2>
         temp3 = matmul(temp, transpose(lcCG))
         temp2 = matmul(muEPS, temp3)
         Volkov_OM_mat_res = localVolkov_OM_mat + matmul(temp2, muEPS)
 
-    end subroutine Volkov_OM
+    end subroutine Volkov_OM 
 
 !***************************************************
     !***************************************************
@@ -919,14 +938,20 @@ contains
             do s = 1, totPrimCount
 
                 do i = 1, 3
-                    if (delt .ne. 0)then
+                    !if (delt .ne. 0)then
                         Anl = Anl * eps(i)
                         alpha = alpha * eps(i)
-                    endif
+                    !endif
+                    !write(*,*) "i = ",i,"r = ",r,"s = ",s,"prim_center(r, i) = ", prim_center(r, i), "prim_center(s, i) =",prim_center(s, i) 
                     call Get_GMut1DG(cZeta(r), cZeta(s), prim_center(r, i), prim_center(s, i), lmn_vec(r, i), lmn_vec(s, i), 0, 0, delt, alpha, Anl, gmu1dg00(i))
                     call Get_GMut1DG(cZeta(r), cZeta(s), prim_center(r, i), prim_center(s, i), lmn_vec(r, i), lmn_vec(s, i), 0, 1, delt, alpha, Anl, gmu1dg01(i))
                     call Get_GMut1DG(cZeta(r), cZeta(s), prim_center(r, i), prim_center(s, i), lmn_vec(r, i), lmn_vec(s, i), 1, 0, delt, alpha, Anl, gmu1dg10(i))
                     call Get_GMut1DG(cZeta(r), cZeta(s), prim_center(r, i), prim_center(s, i), lmn_vec(r, i), lmn_vec(s, i), 1, 1, delt, alpha, Anl, gmu1dg11(i))
+                  if(delt.eq.0)then
+                   write(*,*)"Anl=",Anl,"alpha=",alpha
+                   write(*,*) "i = ",i,"r = ",r,"s = ",s !,"lmn_vec(r, i) = ", lmn_vec(r, i), "lmn_vec(s, i) =",lmn_vec(s, i) 
+                   write(*,*) "gmu1dg00(i)= ",gmu1dg00(i),"gmu1dg01(i) = ",gmu1dg01(i),"gmu1dg10(i) = ",gmu1dg10(i),"gmu1dg11(i) = ", gmu1dg11(i)
+		  endif
                 enddo
 
                 do k = 1, 3
@@ -946,6 +971,7 @@ contains
                     localGMutG(r, s, 1, 1) = localGMutG(r, s, 1, 1) + eps(k) * eps(k) * gmu1dg11(k) * gmu1dg00(kp) * gmu1dg00(kpp)
                     !
                     localGMutG(r, s, 0, 1) = localGMutG(r, s, 0, 1) + eps(k) * gmu1dg01(k) * gmu1dg00(kp) * gmu1dg00(kpp)
+                    localGMutG(r, s, 1, 0) = localGMutG(r, s, 1, 0) + eps(k) * gmu1dg10(k) * gmu1dg00(kp) * gmu1dg00(kpp)
                 enddo
                 localGMutG(r, s, 0, 0) = gmu1dg00(1) * gmu1dg00(2) * gmu1dg00(3)
             enddo
@@ -1047,11 +1073,13 @@ contains
                 temp2 = 0.d0
                 do k1 = 0, l1
                     do k2 = 0, v1
-                        do k3 = 0, pmax - k
-                            do k4 = 0, ppmax - kp
+                        do k3 = 0, l2 - k
+                        !do k3 = 0, pmax - k
+                            do k4 = 0, v2 - kp
+!                            do k4 = 0, ppmax - kp
                                 ksum = k1 + k2 + k3 + k4
                                 if (Mod(ksum, 2) .eq. 0) then
-                                    temp2 = temp2 + comb(l1, k1) * comb(v1, k2) * comb(pmax - k, k3) * comb(ppmax - kp, k4)*(rho**(pmax - k + k4))*((capB + R2 - R1 + alpha)**(l1-k1))*((capB+R2+alpha)**(v1-k2))*(capB**(pmax-k-k3))*((R2-rho*capB)**(ppmax-kp-k4))*(fact(ksum-1,2)/(dsqrt(2.d0)**ksum) )*(dsqrt(zCMod))**(-(ksum+1))*cdexp(dcmplx(0.d0,-0.5d0*zCPhase*(ksum+1)))
+                                    temp2 = temp2 + comb(l1, k1) * comb(v1, k2) * comb(l2 - k, k3) * comb(v2- kp, k4)*(rho**(l2 - k + k4))*((capB + R2 - R1 + alpha)**(l1-k1))*((capB+R2+alpha)**(v1-k2))*(capB**(l2-k-k3))*((R2-rho*capB)**(v2-kp-k4))*(fact(ksum-1,2)/(dsqrt(2.d0)**ksum) )*(dsqrt(zCMod))**(-(ksum+1))*cdexp(dcmplx(0.d0,-0.5d0*zCPhase*(ksum+1)))
                                 endif
                             enddo
                         enddo
