@@ -1,0 +1,26 @@
+the first column is the Real part of each coefficients, the second one is the Imaginary part
+ 
+SUBSPACE P
+  2 eigenvectors of the P subspace
+ 
+Eigenvalue of the eigenvector #  1
+   -244.15454119036406
+Eigenvector #  1
+     -1.00000000000000      0.00000000000000
+      0.00000000638134      0.00000000000000
+ 
+Eigenvalue of the eigenvector #  2
+   -243.95765573517338
+Eigenvector #  2
+     -0.00000000638134      0.00000000000000
+     -1.00000000000000      0.00000000000000
+ 
+ 
+SUBSPACE Q
+  1 eigenvectors of the Q subspace
+ 
+Eigenvalue of the eigenvector #  1
+   -244.56990891426847
+Eigenvector #  1
+      1.00000000000000      0.00000000000000
+ 
