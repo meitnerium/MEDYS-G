@@ -618,11 +618,21 @@ do j=1,dimP
          write (nom2,'(I5.5)') j
          open(110+j,file="spectre_k_canal"// ADJUSTL(nom2) //".dat",status='replace',form='formatted') ! attention: numéro d'unité dépassant 100 
 !        open(110+j,file="spectre2dx_canal"// ADJUSTL(nom2) //".dat",status='replace',form='formatted')
+         write(*,*)"J=,", j,"fctP(J,:,2)=" , fctP(J,:,2) 
 end do
 !write(*,*) "dimP = ",dimP
 !write(*,*) "nki(1) = ",nki(1)
 !write(*,*) "nki(2) = ",nki(2)
 !write(*,*) "nki(3) = ",nki(3)
+
+write(*,*)"test de lcCG, prim_center"
+
+do i=1,totPrimCount
+write(*,*)"MO 1, CG number", i,"lcCG(1,i)=",lcCG(1,i),"Rc(i)=",prim_center(i,:)
+enddo
+
+write(*,*)"eps=",eps( 1), eps( 2), eps( 3)  
+
 do i=1,nki(1)
 !        write(*,*) "k(1)",i,"/",nki(1)
 	kvec(1)=(i-1)*dki(1)+kmin(1)
@@ -632,7 +642,7 @@ do i=1,nki(1)
 	   do k=1,nki(3)
 !             write(*,*) "k(3)",k,"/",nki(3)
              kvec(3)=(k-1)*dki(3)+kmin(3)
-             call Get_Observable_eMomentum_map(kvec,fctP,Upp,eMomentum_gam,lcCG,muEPS,matA,eps,cEta,cZeta,lmn_vec,prim_center) !,matAlpha,matPhi
+             call Get_Observable_eMomentum_map(kvec,fctP,Upp,eMomentum_gam,lcCG,muEPS,matA,eps,cEta,cZeta,lmn_vec,prim_center,tn) !,matAlpha,matPhi
 !             write(*,*) "dimP = ",dimP
              do jj=1,dimP
 !                write(*,*) jj,"/",dimP

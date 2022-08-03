@@ -1,0 +1,10 @@
+#!/bin/bash
+#SBATCH -t 1-00:00
+#SBATCH -c 32
+
+#module load imkl/11.1.4.214
+
+export OMP_NUM_THREADS=32
+#time /home/dion/workspace/medys-2016/medys > LOG
+#time /home/dion/workspace/MEDYS-PW//medys  > LOG
+time /home/dion/scratch/MEDYS-G-observable/medys > LOG

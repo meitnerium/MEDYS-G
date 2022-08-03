@@ -75,7 +75,7 @@ contains
         !////////////////////////////////////////////////////////
         ! start loop over time variable (tn), i.e. TIME-PROPAGATION
         !////////////////////////////////////////////////////////
-
+        matA=0.d0
         call Volkov_OM(1, 1, lcCG, matA, eps, cEta, cZeta, lmn_vec, prim_center, muEPS, muEPS_Sq)!,matAlpha,matPhi ! Volkov_OM called at the start, to calculate matrix elements of the type 
         write(*, *) "----------------------------------"            !   <r|d(1-q)d|s> = <r|d(1-q)u_volk(0) (1-q)d|s>
         write(*, *) "muEPS_Sq in new_dyna (at begining)"
@@ -92,33 +92,28 @@ contains
         do j = 1, dimP
             write (nom, '(I5.5)') j
             open(900 + j, file = "Proba_ionisation_canal" // ADJUSTL(nom) // ".dat", status = 'replace', form = 'formatted')
-            !        open(110+j,file="spectre2dx_canal"// ADJUSTL(nom) //".dat",status='replace',form='formatted')
-            !close(900+j)
-        end do
+         end do
 
-!JN         allocate(Volkov_OM_mat(nt, nt, orb_Q, orb_Q))
-        allocate(Volkov_OM_mat(nt, nt+1, orb_Q, orb_Q)) !JN
+        DO j=1,dimQ
+          WRITE(nom,'(I5.5)') j
+          OPEN(1000+j,file='Proba_canal_Q'//ADJUSTL(nom)//'.dat',STATUS='replace',FORM='formatted')
+        ENDDO
+
+
+        allocate(Volkov_OM_mat(nt, nt, orb_Q, orb_Q)) !JN
         Volkov_OM_mat = dcmplx(0.d0, 0.d0)
 
         do tn = 1, nt ! begin time-loop
             t = tn
             call cpu_time(t2)
     !        write ( *, *) 'tn = ', tn, 'Elapsed CPU time = ', t2 - t1
-            !
-            ! CalPre: Preliminary steps (calculation of Inv33=(1_QQ +1/4 HBARqppq )**(-1), Mat33=1_QQ -1/4 HBARqppq
-            !
+ 
             call CalPre(Mat33, Inv33, Hqppq, delta)
-            !
-            ! fill arrays matA,matAlpha,matPhi
-            !
-            !       call fill_MatA_Alpha_phi(tn,matA,matAlpha,matPhi)
-            ! now replaced by:
+
 
             matA(tn) = Int0()
 
-            ! work is to be done on improvement of Volkov's Area, Alpha parameters calculations
-            !
- !           write(*, *) 'calling propagation, tn=', tn, '/', nt
+ 
             call new_propagation(fctQ, fctP, Upp, muEPS, muEPS_Sq, H0qq, H0pp, MUqq, MUpp, Mat33, Inv33, &
             matA, eps, cEta, cZeta, lmn_vec, prim_center, lcCG, Ers, Volkov_OM_mat) ! ,matAlpha,matPhi
 
@@ -201,7 +196,7 @@ contains
 
         if (tn .ge. 2)then
             do k = 1, tn - 1
-                matA(tn - k, tn) = matA(tn - k, tn - k) + matA(tn - k + 1, tn) ! matA(i,n) est l'aire du champ de t(i) a t(n+1)  NOTE: avec n_max=nt, on a nt+1 temps (nt intervalles) 
+                matA(tn - k, tn) = matA(tn - k, tn - k) + matA(tn - k + 1, tn) 
             enddo
         endif
         do k = 1, tn
@@ -308,7 +303,7 @@ contains
         Integer(kind = int_4), dimension(:,:), Intent(in) :: lmn_vec
         Real(kind = real_8), Dimension(:,:,:,:), Intent(in) :: Ers
 
-        complex(kind = comp_16), allocatable, dimension(:) :: CI1, CI2, CI3, CI4, CI5, CI
+        complex(kind = comp_16), allocatable, dimension(:) :: CI1, CI2, CI3, CI4, CI5, CI,CI3_P
         complex(kind = comp_16), allocatable, dimension(:,:) :: muEPS_r_gam, Uqq, gamm2!,gammCorrection
         !complex(kind=comp_16),allocatable,dimension(:,:,:)   ::Upp
         complex(kind = comp_16), dimension(:,:,:,:) :: Volkov_OM_mat
@@ -319,8 +314,8 @@ contains
         real(kind = real_8), allocatable, dimension(:) :: fctPInt, fctPInt2
 
         Complex(kind = comp_16), allocatable, Dimension(:) :: P_J_Ion_amplitude
-
-        real(kind = real_8) :: seuil, sumfctQ !TODO to be deleted after test
+  
+        real(kind = real_8) :: seuil, sumfctQ , c_fact !TODO to be deleted after test
 
         Character(len = 5) :: nom
         !    Character(len=23)                   ::canal
@@ -336,29 +331,18 @@ contains
         deallocate(Upp_loc)
         !!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-        !allocate(Volkov_OM_mat(nt,nt,orb_Q,orb_Q), muEPS_r_gam(orb_Q,dimP))
+        !allocate(Volkov_OM_mat(nt,nt,orb_Q,orb_Q), muEPS_r_gam(orb_Q,dimP)) ! Volkov_OM_mat now allocated and initialized in new_dyna
         allocate(muEPS_r_gam(orb_Q, dimP))
-        allocate(CI1(dimQ), CI2(dimQ), CI3(dimQ), CI4(dimQ), CI5(dimQ), CI(dimQ))
+        allocate(CI1(dimQ), CI2(dimQ), CI3(dimQ), CI4(dimQ), CI5(dimQ), CI(dimQ), CI3_P(dimQ) )
         allocate(P_J_Ion_amplitude(dimP))
         !
         !!!!!!Propagation within Q-space!!!  
         !
         muEPS_r_gam = dcmplx(0.d0, 0.d0)
-        !Volkov_OM_mat=dcmplx(0.d0,0.d0)
+ 
 
-
-        call Get_muEPS_r_gam(Upp, muEPS, muEPS_r_gam, lcCG, matA, eps, cEta, cZeta, lmn_vec, prim_center, Volkov_OM_mat, fctP, Ers) !,matAlpha,matPhi
-!JN         write(*, *) "----------------------------------------------------"
-!JN         write(*, *) "muEPS_r_gam in new_propagation :"
-!JN         write(*, *) muEPS_r_gam
-        !for i=1,orb_Q
-        !  for j=1,dimP
-        !    write(*,*) "muEPS_r_gamma(i="i",j="j")"
-        !    write(*,*) muEPS_r_gamma(i,j)
-        !  end do
-        !end do
-!JN         write(*, *) "----------------------------------------------------"
-
+        call Get_muEPS_r_gam(Upp, muEPS, muEPS_sq, muEPS_r_gam, lcCG, matA, eps, cEta, cZeta, lmn_vec, prim_center, Volkov_OM_mat, fctP, Ers) !,matAlpha,matPhi
+ 
         CI1 = dcmplx(0.d0, 0.d0); CI2 = dcmplx(0.d0, 0.d0); CI3 = dcmplx(0.d0, 0.d0)
         CI4 = dcmplx(0.d0, 0.d0); CI5 = dcmplx(0.d0, 0.d0); CI = dcmplx(0.d0, 0.d0)
 
@@ -367,23 +351,35 @@ contains
         do i = 1, dimQ
             do j = 1, dimP
                 do r = 1, orb_Q
-                    CI1(i) = CI1(i) + muEPS_r_gam(r, j) * Ers(i, j + dimQ, r, Norb) !  muEPS_r_gam(orb_Q,dimP) calculé par Get_muEPS_r_gam
-!JN                     write(*, *) "-------------------------------------------------------------------------------"
-!JN                     write(*, *) "i = ", i, "/dimQ, j = ", j, "/dimP, r = ", r, "/orb_Q, CI1=", CI1(i), ", muEPS_r_gam(r,j) = ", muEPS_r_gam(r,j),",Ers(i ,j+dimQ,r,Norb) = ",Ers(i ,j+dimQ,r,Norb)
+                    CI1(i) = CI1(i) + matA(tn) *muEPS_r_gam(r, j) * Ers(i, j + dimQ, r, Norb) !  muEPS_r_gam(orb_Q,dimP) calculé par Get_muEPS_r_gam
                 end do
             end do
         end do
         call gemv(Inv33, CI1, CI2) !Etape2 
         call gemv(Inv33, fctQ, CI3) !Etape3 
         call gemv(Mat33, CI3, CI4) !Etape4
-        CI5 = CI4 - (dcmplx(0.d0, 1.d0) * CI2) !Etape5
-        call gemv(Uqq, CI5, CI) !Etape6
- 
+        CI5 = CI4  - (dcmplx(0.d0, 1.d0) * CI2) !Etape5
+        call gemv(Uqq, CI5, CI) !Etape6F
+        if(tn.le.100)then
+        write(*,*) "...........................tn=", tn, ".........................................."
+        write(*,*) "testing norm conservation- part 1"
+        write(*,*) "|CI4|^2-|fctQ|^2=", dot_product( CI4,CI4)-dot_product(fctQ,fctQ)
+          CI3_P=4.d0*matmul(Mat33-ZidentiMAT(dimQ),CI3)
+        write(*,*) "compared to CI3.Hqqp*CI3=", dot_product( CI3,CI3_P)
+        write(*,*) "|CI1|^2=", dot_product( CI1,CI1)
+      ! write(*, *) "        ------------------------------       "
+        write(*,*) "testing norm conservation- part 2"
+        write(*,*) "|CI2|^2=", dot_product( CI2,CI2)
+        CI3_P= matmul( ZidentiMAT(dimQ)-Mat33,CI2)
+        write(*, *) "compared to dot_product(CI2,Hqqp*CI2)-dot_product(CI1,CI2)=", dot_product(CI2,CI3_P)-dot_product(CI1,CI2)
+        write(*, *) "norm of Q-part (squared)=", dot_product(CI,CI), dot_product(CI5,CI5)
+ !       write(*, *) "expected norm of P-part (squared)=", dot_product(CI,CI)
+        endif
         fctQ = CI !propagation of Q-part of wp done
 
         sumfctQ = 0.d0
         do j = 1, dimQ
-            sumfctQ = sumfctQ + abs(fctQ(j))**2
+            sumfctQ = sumfctQ + cdabs(fctQ(j))**2 
         end do
  
  !           write(*, *) "Sum fctQ = ", sumfctQ
@@ -394,45 +390,72 @@ contains
         !!!!!!Propagation within P-space!!!
         !
        allocate(gamm2(dimP, orb_Q))
+        gamm2=dcmplx(0.d0, 0.d0)
         CI1 = dcmplx(0.d0, 0.d0)
-        CI1 = dcmplx(0.d0, -1.d0/2.d0) * CI2 + CI3 !nouvelle Etape10
-        do j = 1, dimP
-            do r = 1, orb_Q
+        CI1 = CI3  + dcmplx(0.d0,0.5d0)*CI2 !nouvelle Etape10
+
+         do r = 1, orb_Q
+             do j = 1, dimP
+!
                 do i = 1, dimQ
-                    gamm2(j, r) = gamm2(j, r) +dcmplx(0.d0, -1.d0) * Ers(i, j + dimQ, r, Norb) * CI1(i) !nouvelles Etape11-12
+                    gamm2(j, r) = gamm2(j, r) -dcmplx(0.d0, 1.d0)*Ers(i, j + dimQ, r, Norb) * CI1(i) !nouvelles Etape11-12
                 enddo
             end do
+ !         call gemv(Upp(tn,:,:), gamm2(:,r), fctP(:,r, tn + 1))
         end do
- !       write(*, *) "-------------------------------------------------------------------------------"
- !        write(*, *) "gamm2  in new_propagation :"
- !        write(*, *) gamm2
- !        write(*, *) "-------------------------------------------------------------------------------"
-
+  
         call gemm(Upp(tn,:,:), gamm2, fctP(:,:, tn + 1)) !nouvelle Etape13(a)
-  !      write(*, *) "-------------------------------------------------------------------------------"
- !        write(*, *) "fctP(:,:,tn+1=", tn + 1, ") in new_propagation ):"
- !        write(*, *) fctP(:,:, tn + 1)
- !       write(*, *) "-------------------------------------------------------------------------------"
-
+ 
         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         ! Propagation within P-space: Done
         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+   
         call Get_Observable_P_I(Upp, fctP, muEPS_Sq, Volkov_OM_mat, matA, P_J_Ion_amplitude, tn + 1)
 
-        !    open(52,file='PSomme.dat',status='replace',form='formatted')
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! ADDED 19-07-2022- renormalization
+      normP=0.d0
+      do j=1,dimP
+           normP=normP+cdabs(P_J_Ion_amplitude(j))
+      end do
+      P_normfactor=1.d0/dsqrt(abs(normP+sumfctQ)) 
+      fctP=P_normfactor*fctP
+      fctQ=P_normfactor*fctQ
+      
+      !!  check new norm=1 (forced !)
+
+                 write(*,*) "normalization test"
+
+        call Get_Observable_P_I(Upp, fctP, muEPS_Sq, Volkov_OM_mat, matA, P_J_Ion_amplitude, tn + 1)
+        sumfctQ = 0.d0
+        do j = 1, dimQ
+            sumfctQ = sumfctQ + cdabs(fctQ(j))**2 
+        end do
+ 
+        normP=0
+        do j=1,dimP
+           normP=normP+cdabs(P_J_Ion_amplitude(j))
+           write(*,*)  tn+1, "|ionic channel J=", j,  P_J_Ion_amplitude(j) 
+           write(*,*), "norm Q=", sumfctQ, "norm P=",  normP, "total=",   normP+ sumfctQ
+        end do           
+! END added renorm proc.  
+
         do j = 1, dimP
             write (nom, '(I5.5)') j
-            !open(900+j,file="Proba_ionisation_canal"// ADJUSTL(nom) //".dat",status='old',form='formatted')
-            !        open(110+j,file="spectre2dx_canal"// ADJUSTL(nom) //".dat",status='replace',form='formatted')
-            write(900 + j, '(3X,I5.2,3X,F10.5,3X,ES24.14)') tn + 1, (tn + 1) * delta, cdabs(P_J_Ion_amplitude(j))**2
-!JN             write(*, '(3X,I5.2,3X,F10.5,3X,ES24.14)') tn + 1, (tn + 1) * delta, cdabs(P_J_Ion_amplitude(j))**2
-            !close(900+j)
+             write(900 + j, '(3X,I5.2,3X,F10.5,3X,ES24.14)') tn + 1, (tn + 1) * pdt, cdabs(P_J_Ion_amplitude(j))
         end do
 
-        !do j=1,dimP
-        !write(900+j,'(3X,I5.2,3X,F10.5,3X,ES24.14)')  tn+1, (tn+1)*delta, cdabs(P_J_Ion_amplitude(j))**2
-        !         end do
+        DO j=1,dimQ
+          WRITE(1000+j,'(3X,I5.2,3X,F10.5,3X,ES24.14)') tn+1,(tn+1.E0)*pdt,cdabs(fctQ(j))**2
+        ENDDO
+
+
+
+  !    do j=1,dimP
+  !         write(*,*) "normalization test"
+  !         P_normfactor=P_normfactor+cdabs(P_J_Ion_amplitude(j))
+  !         write(*,*)  tn+1,   P_J_Ion_amplitude(j) , sumfctQ, P_normfactor,  P_normfactor+ sumfctQ
+  !    end do
     end subroutine new_propagation
 
     !****************************************************************************************
@@ -577,7 +600,7 @@ contains
 
             Write (18, '(F22.14)') Real(eval(I))
 
-            if (dabs(aimag(eval(I))) .gt. 1.d-5) then
+            if (dabs(aimag(eval(I))) .gt. 1.d-5) then    
                 Write(*, *) 'eigenValue', I, 'has a complex part'
                 STOP 'error in etatInitial'
             endif
@@ -628,11 +651,11 @@ contains
 
 
 
-    subroutine Get_muEPS_r_gam(Upp, muEPS, muEPS_r_gam, lcCG, matA, eps, cEta, cZeta, lmn_vec, prim_center, Volkov_OM_mat, fctP, Ers) !,matAlpha,matPhi
+    subroutine Get_muEPS_r_gam(Upp, muEPS, muEPS_Sq, muEPS_r_gam, lcCG, matA, eps, cEta, cZeta, lmn_vec, prim_center, Volkov_OM_mat, fctP, Ers) !,matAlpha,matPhi
         !*******************************************
         !*******************************************
         complex(kind = comp_16), dimension(:,:,:), intent(in) :: fctP, Upp
-        Complex(kind = comp_16), Dimension(:,:), Intent(in) :: muEPS
+        Complex(kind = comp_16), Dimension(:,:), Intent(in) :: muEPS, muEPS_Sq
 
         Real(kind = real_8), Dimension(:), Intent(inout) :: matA
         ! Real(kind=real_8), dimension(:,:),Intent(inout):: matAlpha, matPhi
@@ -654,34 +677,31 @@ contains
 
 
             do tnn = 2, tn
-                call Volkov_OM(tn, tnn - 1, lcCG, matA, eps, cEta, cZeta, lmn_vec, prim_center, muEPS, gamm2) !,matAlpha,matPhi
+ 
+                call Volkov_OM(tn, tnn - 1, lcCG, matA, eps, cEta, cZeta, lmn_vec, prim_center, muEPS, gamm2)  
+  
                 Volkov_OM_mat(tn, tnn - 1,:,:) = gamm2
- !               write(*, *) "------------------------------------------------"
- !               write(*, *) "Volkov_OM_mat(tn=", tn, ",tnn-1=", tnn - 1, ",:,:) in Get_muEPS_r_gam"
- !               write(*, *) Volkov_OM_mat(tn, tnn - 1,:,:)
- !               write(*, *) "------------------------------------------------"
+ 
                 do s = 1, orb_Q
                     temp = fctP(:, s, tnn)
 
-                    !! write temp ici ???
+
                     if (tnn .lt. tn)then
                         do nn = tnn, tn - 1
                             call gemv(Upp(nn,:,:), temp, temp2)
                             temp = temp2
+
+ 
                         end do
-                        !! write temp ici ???
                     endif
                     do j = 1, dimP
                         do r = 1, orb_Q
                             !
-                            muEPS_r_gam(r, j) = muEPS_r_gam(r, j) + temp(j) * matA(tnn - 1) * Volkov_OM_mat(tn, tnn - 1, r, s)
+                            muEPS_r_gam(r, j) = muEPS_r_gam(r, j) + temp(j)*matA(tnn-1)*Volkov_OM_mat(tn, tnn - 1, r, s)
                         end do
                     end do
                 enddo
             end do
- !           write(*, *) "-------------------------------------------------"
-!            write(*, *) "In Get_muEPS_r_gam, matA(tn) = ", matA(tn), "muEPS_r_gam = ", muEPS_r_gam
-            muEPS_r_gam = matA(tn) * muEPS_r_gam
         endif
 
     end subroutine Get_muEPS_r_gam
@@ -736,69 +756,13 @@ contains
 
     !*******************************************
     !*******************************************
-    subroutine Get_muEPS_r_gam_old(Upp, muEPS, muEPS_r_gam, lcCG, matA, eps, cEta, cZeta, lmn_vec, prim_center, Volkov_OM_mat, fctP, Ers) !,matAlpha,matPhi
-        !*******************************************
-        !*******************************************
-        complex(kind = comp_16), dimension(:,:,:), intent(in) :: fctP, Upp
-        Complex(kind = comp_16), Dimension(:,:), Intent(in) :: muEPS
-
-        Real(kind = real_8), Dimension(:), Intent(inout) :: matA
-        ! Real(kind=real_8), dimension(:,:),Intent(inout):: matAlpha, matPhi
-
-        Real(kind = real_8), dimension(:,:), Intent(in) :: cEta, lcCG, prim_center
-        Real(kind = real_8), dimension(:), Intent(in) :: cZeta, eps
-        !Integer(kind=int_4),allocatable,dimension(:,:),Intent(in)::prim_lmn
-        Integer(kind = int_4), dimension(:,:), Intent(in) :: lmn_vec
-        Real(kind = real_8), Dimension(:,:,:,:), Intent(in) :: Ers
-
-        complex(kind = comp_16), allocatable, dimension(:,:) :: gamm2 !CI1,CI2,CI3,CI4,CI5,CI
-        complex(kind = comp_16), dimension(:,:), Intent(inout) :: muEPS_r_gam !,gammCorrection
-        complex(kind = comp_16), dimension(:,:,:,:), Intent(inout) :: Volkov_OM_mat
-        complex(kind = comp_16), dimension(dimP) :: temp, temp2
-        integer :: nn, j, r, s, tnn
-
-        allocate(gamm2(orb_Q, orb_Q))
-        if (tn .ge. 2)then
-            do j = 1, dimP
-                do r = 1, orb_Q
-                    do s = 1, orb_Q
-                        do tnn = 2, tn
-                            gamm2 = 0.d0
-                            call Volkov_OM(tn, tnn - 1, lcCG, matA, eps, cEta, cZeta, lmn_vec, prim_center, muEPS, gamm2) !,matAlpha,matPhi
-                            Volkov_OM_mat(tn, tnn - 1,:,:) = gamm2
-                            write(*, *) "------------------------------------------------"
-                            write(*, *) "Volkov_OM_mat(tn=", tn, ",tnn-1=", tnn - 1, ",:,:) in Get_muEPS_r_gam"
-                            write(*, *) Volkov_OM_mat(tn, tnn - 1,:,:)
-                            write(*, *) "------------------------------------------------"
-                            temp = fctP(:, s, tnn)
-                            if (tnn .lt. tn)then
-                                do nn = tnn, tn - 1
-                                    call gemv(Upp(nn,:,:), temp, temp2)
-                                    temp = temp2
-                                    write(*, *) "------------------------------------------------"
-                                    write(*, *) "Volkov_OM_mat(tn=", tn, ",tnn-1=", tnn - 1, ",:,:) in Get_muEPS_r_gam (2)"
-                                    write(*, *) Volkov_OM_mat(tn, tnn - 1,:,:)
-                                    write(*, *) "------------------------------------------------"
-                                    temp = fctP(:, s, tnn)
-                                end do
-                            endif
-                            muEPS_r_gam(r, j) = muEPS_r_gam(r, j) + temp(j) * matA(tnn - 1) * Volkov_OM_mat(tn, tnn - 1, r, s)
-                        enddo
-                    end do
-                end do
-            end do
-            write(*, *) "-------------------------------------------------"
-            write(*, *) "In Get_muEPS_r_gam, matA(tn) = ", matA(tn), "muEPS_r_gam = ", muEPS_r_gam
-            muEPS_r_gam = matA(tn) * muEPS_r_gam
-        endif
-
-    end subroutine Get_muEPS_r_gam_old
+    
 
     !***************************************************
 
     !***************************************************
     !***************************************************
-    subroutine Volkov_OM(tn, tnn, lcCG, matA, eps, cEta, cZeta, lmn_vec, prim_center, muEPS, Volkov_OM_mat_res) !,matAlpha,matPhi
+    subroutine Volkov_OM(t_n, t_nn, lcCG, matA, eps, cEta, cZeta, lmn_vec, prim_center, muEPS, Volkov_OM_mat_res) !,matAlpha,matPhi
         !***************************************************
         !***************************************************
         Real(kind = real_8), Dimension(:), Intent(inout) :: matA
@@ -815,105 +779,69 @@ contains
         !Complex(kind=comp_16), Dimension(: ) 	:: temp
         Complex(kind = comp_16), allocatable, Dimension(:,:) :: temp, temp2, temp3!,GMutG
 
-        Integer(kind = int_4), Intent(in) :: tn, tnn
+        Integer(kind = int_4), Intent(in) :: t_n, t_nn
         integer :: j, r, s, ss
 
         allocate(temp(orb_Q, totPrimCount), temp2(orb_Q, orb_Q), GMutG(totPrimCount, totPrimCount, 0:1, 0:1)) !,Volkov_OM_mat_res(orb_Q,orb_Q)
         allocate(temp3(orb_Q, orb_Q))
-        allocate(localVolkov_OM_mat(orb_Q, orb_Q))
+        allocate(localVolkov_OM_mat(orb_Q, orb_Q))!,Volkov_OM_mat_res(orb_Q,orb_Q))
         localVolkov_OM_mat = 0.d0
         !***************
-        call Get_GMutG(tn, tnn, matA, eps, cEta, cZeta, lmn_vec, prim_center, GMutG)! ,matAlpha,matPhi
+        GMutG = dcmplx(0.d0, 0.d0)
+        call Get_GMutG(t_n, t_nn, matA, eps, cEta, cZeta, lmn_vec, prim_center, GMutG)! ,matAlpha,matPhi
 
         !todo : src/all_v001/dynamique_new.f90(633): error #6284: There is no matching specific function for this generic function reference.   [GEMM]
         temp = matmul(lcCG, GMutG(:,:, 1, 1)) !! for <G1|d (U_volkov) d |G2>
-        !temp=gemm(lcCG,GMutG(:,:,1,1),'N','N',dcmplx(1.d0,0.d0),dcmplx(1.d0,0.d0)) !! for <G1|d (U_volkov) d |G2>
-        !temp=zgemm('N','N',lcCG,GMutG(:,:,1,1)) !! for <G1|d (U_volkov) d |G2>
         temp2 = matmul(temp, transpose(lcCG))
+
         temp = matmul(lcCG, GMutG(:,:, 0, 1)) !! for <G1|d^0 (U_volkov) d |G2>
         temp3 = matmul(temp, transpose(lcCG))
+
         temp = matmul(muEPS, temp3)
         localVolkov_OM_mat = temp2 - temp  !- conjg(transpose(temp))
-                 if(tnn.eq.tn)then
-                    write(*,*)"tn=",tn
-                    write(*,*)"temp2=", temp2
-     	            write(*,*) "temp=", temp
-                 endif
-!
-        temp = matmul(lcCG, GMutG(:,:, 1, 0)) !! for <G1|d^0 (U_volkov) d |G2>
-        temp3 = matmul(temp, transpose(lcCG))
-        temp = matmul(temp3,muEPS)
-                 if(tnn.eq.tn)then
-                    write(*,*)"temp=", temp
+
+                if(t_nn.eq.t_n)then
+                   write(*,*)" t_n=",t_n, "t_nn=",t_nn, "muEPS_sq= <r|d(1-q)d|s> matrix calculation " 
+                    write(*,*)"temp3=", temp3
                     write(*,*)"muEPS=", muEPS 
                  endif
 
 !
+!
+        temp = matmul(lcCG, GMutG(:,:, 1, 0)) !! for <G1|d^0 (U_volkov) d |G2>
+        temp3 = matmul(temp, transpose(lcCG))
+        temp = matmul(temp3,muEPS)
         localVolkov_OM_mat =localVolkov_OM_mat -temp
+
+   ! 
+
+!
         temp = matmul(lcCG, GMutG(:,:, 0, 0)) !! for <G1|d^0 (U_volkov) d^0  |G2>
         temp3 = matmul(temp, transpose(lcCG))
         temp2 = matmul(muEPS, temp3)
         Volkov_OM_mat_res = localVolkov_OM_mat + matmul(temp2, muEPS)
 
+                 if(t_nn.eq.t_n)then
+                  write(*,*)" t_n=",t_n, "t_nn=",t_nn, "muEPS_sq= <r|d(1-q)d|s> matrix calculation"  
+                    write(*,*)"temp3=", temp3
+                    write(*,*)" temp3 must be the (orb_Q x orb_Q) unit matrix here" 
+                    write(*,*)"Volkov_OM_mat_res=", Volkov_OM_mat_res
+                 endif
+
+!
+
+
     end subroutine Volkov_OM 
 
-!***************************************************
+!****
     !***************************************************
-    subroutine Volkov_OM_new(tn, tnn, lcCG, matA, eps, cEta, cZeta, lmn_vec, prim_center, muEPS, Volkov_OM_mat_res) !,matAlpha,matPhi
+    !***************************************************
+    subroutine Get_GMutG(t_n, t_nn, matA, eps, cEta, cZeta, lmn_vec, prim_center, GMutG)! ,matAlpha,matPhi
         !***************************************************
         !***************************************************
         Real(kind = real_8), Dimension(:), Intent(inout) :: matA
         ! Real(kind=real_8), dimension(:,:),Intent(inout):: matAlpha, matPhi
-
-        Real(kind = real_8), dimension(:,:), Intent(in) :: cEta, lcCG, prim_center
-        Real(kind = real_8), dimension(:), Intent(in) :: cZeta, eps
-        !Integer(kind=int_4),allocatable,dimension(:,:),Intent(in)::prim_lmn
-        Integer(kind = int_4), dimension(:,:), Intent(in) :: lmn_vec
-        complex(kind = comp_16), dimension(:,:), Intent(out) :: Volkov_OM_mat_res
-        complex(kind = comp_16), dimension(:,:), allocatable :: localVolkov_OM_mat
-        complex(kind = comp_16), allocatable, dimension(:,:,:,:) :: GMutG
-        Complex(kind = comp_16), Dimension(:,:), Intent(in) :: muEPS
-        !Complex(kind=comp_16), Dimension(: ) 	:: temp
-        Complex(kind = comp_16), allocatable, Dimension(:,:) :: temp, temp2, temp3!,GMutG
-
-        Integer(kind = int_4), Intent(in) :: tn, tnn
-        integer :: j, r, s, ss
-
-        allocate(temp(orb_Q, totPrimCount), temp2(orb_Q, orb_Q), GMutG(totPrimCount, totPrimCount, 0:1, 0:1)) !,Volkov_OM_mat_res(orb_Q,orb_Q)
-        allocate(temp3(orb_Q, orb_Q))
-        allocate(localVolkov_OM_mat(orb_Q, orb_Q))
-        localVolkov_OM_mat = 0.d0
-        !***************
-        call Get_GMutG(tn, tnn, matA, eps, cEta, cZeta, lmn_vec, prim_center, GMutG)! ,matAlpha,matPhi
-
-        !! for <G1|d (U_volkov) d |G2>
-        call zgemm(lcCG,GMutG(:,:,1,1),temp) !! for <G1|d (U_volkov) d |G2>
-        call zgemm(temp, transpose(lcCG),temp2)
-        !! for <G1|d^0 (U_volkov) d |G2>
-        call zgemm(lcCG, GMutG(:,:, 0, 1),temp) !! for <G1|d^0 (U_volkov) d |G2>
-        call zgemm(temp, transpose(lcCG),temp3)
-        call zgemm(muEPS, temp3,temp)
-!
-        localVolkov_OM_mat = temp2 - temp - conjg(transpose(temp))
-!
-        !! for <G1|d^0 (U_volkov) d^0  |G2>
-        call zgemm(lcCG, GMutG(:,:, 0, 0),temp) !! for <G1|d^0 (U_volkov) d^0  |G2>
-        call zgemm(temp, transpose(lcCG),temp3)
-        call zgemm(muEPS, temp3,temp2)
-        call zgemm(muEPS, temp2,temp3)
-!
-        Volkov_OM_mat_res = localVolkov_OM_mat + temp3
-
-    end subroutine Volkov_OM_new
-
-    !***************************************************
-    !***************************************************
-    subroutine Get_GMutG(tn, tnn, matA, eps, cEta, cZeta, lmn_vec, prim_center, GMutG)! ,matAlpha,matPhi
-        !***************************************************
-        !***************************************************
-        Real(kind = real_8), Dimension(:), Intent(inout) :: matA
-        ! Real(kind=real_8), dimension(:,:),Intent(inout):: matAlpha, matPhi
-        Real(kind = real_8) :: alpha, Anl, Phi
+        Real(kind = real_8) :: alpha, Anl, Phi, alpha_eps, Anl_eps
 
         Real(kind = real_8), dimension(:,:), Intent(in) :: cEta, prim_center !lcCG
         Real(kind = real_8), dimension(:), Intent(in) :: cZeta, eps
@@ -926,32 +854,28 @@ contains
         !Complex(kind=comp_16), Dimension(: ) :: temp
         !Complex(kind=comp_16), Dimension(:,: ) :: temp,temp2!,GMutG 
         Complex(kind = comp_16), Dimension(3) :: gmu1dg00, gmu1dg01, gmu1dg10, gmu1dg11
-        Integer(kind = int_4), Intent(in) :: tn, tnn!totPrimCount 
+        Integer(kind = int_4), Intent(in) :: t_n, t_nn!totPrimCount 
         Integer(kind = int_4) :: i, j, k, r, s, kp, kpp, delt
 
         allocate(localGMutG(totprimcount,totprimcount,0:1,0:1))
-        delt = (tn - tnn)
-        GMutG = dcmplx(0.d0, 0.d0)
-
-        call Get_Anl_Alpha_Phi(matA, tn, tnn, Anl, alpha, Phi)
+        delt = (t_n - t_nn)
+        localGMutG = dcmplx(0.d0, 0.d0)
+        Anl_eps = 0.d0
+        alpha_eps = 0.d0
+        call Get_Anl_Alpha_Phi(matA, t_n, t_nn, Anl, alpha, Phi)
         do r = 1, totPrimCount
             do s = 1, totPrimCount
 
                 do i = 1, 3
-                    !if (delt .ne. 0)then
-                        Anl = Anl * eps(i)
-                        alpha = alpha * eps(i)
-                    !endif
-                    !write(*,*) "i = ",i,"r = ",r,"s = ",s,"prim_center(r, i) = ", prim_center(r, i), "prim_center(s, i) =",prim_center(s, i) 
-                    call Get_GMut1DG(cZeta(r), cZeta(s), prim_center(r, i), prim_center(s, i), lmn_vec(r, i), lmn_vec(s, i), 0, 0, delt, alpha, Anl, gmu1dg00(i))
-                    call Get_GMut1DG(cZeta(r), cZeta(s), prim_center(r, i), prim_center(s, i), lmn_vec(r, i), lmn_vec(s, i), 0, 1, delt, alpha, Anl, gmu1dg01(i))
-                    call Get_GMut1DG(cZeta(r), cZeta(s), prim_center(r, i), prim_center(s, i), lmn_vec(r, i), lmn_vec(s, i), 1, 0, delt, alpha, Anl, gmu1dg10(i))
-                    call Get_GMut1DG(cZeta(r), cZeta(s), prim_center(r, i), prim_center(s, i), lmn_vec(r, i), lmn_vec(s, i), 1, 1, delt, alpha, Anl, gmu1dg11(i))
-                  if(delt.eq.0)then
-                   write(*,*)"Anl=",Anl,"alpha=",alpha
-                   write(*,*) "i = ",i,"r = ",r,"s = ",s !,"lmn_vec(r, i) = ", lmn_vec(r, i), "lmn_vec(s, i) =",lmn_vec(s, i) 
-                   write(*,*) "gmu1dg00(i)= ",gmu1dg00(i),"gmu1dg01(i) = ",gmu1dg01(i),"gmu1dg10(i) = ",gmu1dg10(i),"gmu1dg11(i) = ", gmu1dg11(i)
-		  endif
+     
+                      Anl_eps = Anl*eps(i)
+                      alpha_eps = alpha*eps(i)
+     
+                    call Get_GMut1DG(r,s,cZeta(r), cZeta(s), prim_center(r, i), prim_center(s, i), lmn_vec(r, i), lmn_vec(s, i), 0, 0, delt, alpha_eps, Anl_eps , gmu1dg00(i))
+                    call Get_GMut1DG(r,s,cZeta(r), cZeta(s), prim_center(r, i), prim_center(s, i), lmn_vec(r, i), lmn_vec(s, i), 0, 1, delt, alpha_eps, Anl_eps , gmu1dg01(i))
+                    call Get_GMut1DG(r,s,cZeta(r), cZeta(s), prim_center(r, i), prim_center(s, i), lmn_vec(r, i), lmn_vec(s, i), 1, 0, delt, alpha_eps, Anl_eps , gmu1dg10(i))
+                    call Get_GMut1DG(r,s,cZeta(r), cZeta(s), prim_center(r, i), prim_center(s, i), lmn_vec(r, i), lmn_vec(s, i), 1, 1, delt, alpha_eps, Anl_eps , gmu1dg11(i))
+     
                 enddo
 
                 do k = 1, 3
@@ -977,25 +901,24 @@ contains
             enddo
         enddo
         GMutG = localGMutG * cdexp(dcmplx(0.d0, -Phi))
-
-    end subroutine Get_GMutG
+   end subroutine Get_GMutG
 
 
 
     !*******************************************
     !*******************************************
-    subroutine Get_Anl_Alpha_Phi(matA, tn, tnn, A_nl, Alpha_nl, Phi_nl)
+    subroutine Get_Anl_Alpha_Phi(matA, t_n, t_nn, A_nl, Alpha_nl, Phi_nl)
         !*******************************************
         !*******************************************
         Real(kind = real_8), Intent(out) :: A_nl, Alpha_nl, Phi_nl
         Real(kind = real_8), Dimension(:), Intent(inout) :: matA
-        Integer(kind = int_4), Intent(in) :: tn, tnn
+        Integer(kind = int_4), Intent(in) :: t_n, t_nn
         Integer(kind = int_4) :: i, j, k, n, nn
 
 
         A_nl = 0.d0; Alpha_nl = 0.d0; Phi_nl = 0.d0
-        if (tnn .lt. tn) then
-            do i = tnn, tn - 1
+        if(t_nn.lt.t_n) then
+            do i = t_nn, t_n - 1
                 A_nl = A_nl + matA(i)
                 Alpha_nl = Alpha_nl + A_nl !Alpha_nl=Alpha_nl+(tn-1-i)*matA(i)
                 Phi_nl = Phi_nl + (A_nl)**2
@@ -1015,22 +938,22 @@ contains
     !***************************************************
     !***************************************************
     !***************************************************
-    subroutine Get_GMut1DG(zet1, zet2, R1, R2, l1, l2, v1, v2, dlt, alpha, Anl, res)
+    subroutine Get_GMut1DG(r,s,zet1, zet2, R1, R2, l1, l2, v1, v2, dlt, alpha, Anl, res)
         !***************************************************
         !***************************************************
         Real(kind = real_8), Intent(in) :: alpha, Anl, zet1, zet2, R1, R2
-        Integer(kind = int_4) :: l1, l2, v1, v2, lv1, lv2, llvv, l12, dlt
+        Integer(kind = int_4) :: l1, l2, v1, v2, lv1, lv2, llvv, l12, dlt,r,s
         Complex(kind = comp_16) :: res, rho
 
         Complex(kind = comp_16) :: temp, temp2, prefact, capB, zetC, Im_u
         Real(kind = real_8) :: z1Mod, z1Phase, z2Mod, z2Phase, zCMod, zCPhase, a
-        integer :: k, kp, ksum, k1, k2, k3, k4, p, pp, pmax, ppmax
+        integer :: k, kp, ksum, k1, k2, k3, k4, p, pp, pmax, ppmax,kadd
 
         Im_u = dcmplx(0.d0, 1.d0) !Def. found in Module basics : Real(kind=real_8),parameter :: pio2=pi/2.0_real_8
 
 
 
-        prefact = sqrt(sqrt(4 * zet1 * zet2/pi**2)) * cdexp(dcmplx(0.d0, -(R2 + alpha) * Anl))
+        prefact = sqrt(sqrt(4 * zet1 * zet2/pi**2)) * cdexp(dcmplx(0.d0, (R2 + alpha) * Anl))
         prefact = sqrt(pi) * sqrt(((4 * zet1)**l1)*((4 * zet2)**l2)) * prefact
         select case(dlt)
         case(0)
@@ -1041,12 +964,13 @@ contains
             ppmax = 0
         case default
             a = 1/(2.d0 * dlt * pdt)
-            zetC = dcmplx(zet2, a)
+            zetC = dcmplx(zet2, -a)
             z2Mod = abs(zetC)
             z2Phase = atan2(dimag(zetC), dreal(zetC))
-            rho = Im_u * a * zetC/z2Mod**2
+    !        rho = Im_u * a *zetC/z2Mod**2
+            rho=-Im_u*a*cdexp(dcmplx(0.d0, -z2Phase))/z2Mod 
           !   zetC =  zet1 
-            zetC = -Im_u * a * (1.d0 + rho) + zet1 ! - Im_u*a+ (a**2)zetC/z2Mod**2+zet1
+            zetC = -Im_u * a * (1.d0 - rho) + zet1 ! - Im_u*a+ (a**2)zetC/z2Mod**2+zet1
             pmax = l2
             ppmax = v2
             prefact = dsqrt(a) * cdexp(dcmplx(0.d0, -pi/4)) * prefact
@@ -1056,31 +980,40 @@ contains
         zCMod = abs(zetC)
         zCPhase = atan2(dimag(zetC), dreal(zetC)) !todo : verifier atan ou atan2
         capB = -dcmplx(zet1 * (R2 - R1 + alpha), -Anl/2.d0) * cdexp(dcmplx(0.d0, -zCPhase))/zCMod !todo: a verifier
-        prefact = cdexp(zetC * capB * capB) * prefact
-        prefact = cdexp(-zet1 * (dcmplx((alpha + R2 - R1)*(alpha + R2 - R1), 0.d0))) * prefact
 
+        prefact = cdexp(zetC * capB * capB-zet1*(alpha + R2 - R1)*(alpha + R2 - R1)) * prefact
+
+!     
 
         temp = dcmplx(1.d0, 0.d0)
         res = dcmplx(0.d0, 0.0)
-
+       kadd=0
 
         do k = 0, pmax
             do kp = 0, ppmax
                 p = k + kp
-                if ((dlt .ne. 0).and.(Mod(p, 2) .eq. 0)) then
-                    temp = comb(l2, k) * comb(v2, kp) * fact(p - 1, 2)/(sqrt(2.d0)**p)*(sqrt(z2Mod)**(-(p + 1)) * cdexp(dcmplx(0.d0, -0.5d0 * z2Phase * (p + 1))))
+                if (dlt .ne. 0)then
+                     temp=dcmplx(0.d0,0.d0)                                               
+                     if(Mod(p, 2) .eq. 0) then
+                     temp = comb(l2, k) * comb(v2, kp) * (fact(p - 1, 2)/(  (2.d0)**(p/2)) )*(sqrt(z2Mod)**(-(p + 1)) * cdexp(dcmplx(0.d0, -0.5d0 * z2Phase * (p + 1))))
+                     kadd=0
+                     endif
+
                 endif
                 temp2 = 0.d0
                 do k1 = 0, l1
                     do k2 = 0, v1
                         do k3 = 0, l2 - k
-                        !do k3 = 0, pmax - k
-                            do k4 = 0, v2 - kp
-!                            do k4 = 0, ppmax - kp
+                             do k4 = 0, v2 - kp
+!   
                                 ksum = k1 + k2 + k3 + k4
+
                                 if (Mod(ksum, 2) .eq. 0) then
-                                    temp2 = temp2 + comb(l1, k1) * comb(v1, k2) * comb(l2 - k, k3) * comb(v2- kp, k4)*(rho**(l2 - k + k4))*((capB + R2 - R1 + alpha)**(l1-k1))*((capB+R2+alpha)**(v1-k2))*(capB**(l2-k-k3))*((R2-rho*capB)**(v2-kp-k4))*(fact(ksum-1,2)/(dsqrt(2.d0)**ksum) )*(dsqrt(zCMod))**(-(ksum+1))*cdexp(dcmplx(0.d0,-0.5d0*zCPhase*(ksum+1)))
+
+                                    temp2 = temp2 + comb(l1, k1) * comb(v1, k2) * comb(l2 +kadd- k, k3) * comb(v2- kp, k4)*(rho**(l2 - k + k4+kadd))*((capB + R2 - R1 + alpha)**(l1-k1))*((capB+R2+alpha)**(v1-k2))*(capB**(l2+kadd-k-k3))*((R2+rho*capB)**(v2-kp-k4))*(fact(ksum-1,2)/((2.d0)**(ksum/2)) )*(dsqrt(zCMod))**(-(ksum+1))*cdexp(dcmplx(0.d0,-0.5d0*zCPhase*(ksum+1)))
+
                                 endif
+
                             enddo
                         enddo
                     enddo
@@ -1117,7 +1050,7 @@ contains
         Complex(kind = comp_16), Dimension(:) :: P_J_Ion_amplitude
         Integer(kind = int_4), Intent(in) :: t_idx
         Integer(kind = int_4) :: nn, r, s, tnn, tnp
-        Complex(kind = comp_16), Dimension(dimP) :: temp, temp2, tempr, tempr2!,ztemp 
+        Complex(kind = comp_16), Dimension(dimP) :: temp, temp2, tempr, tempr2, temp3, tempr3!,ztemp 
         Complex(kind = comp_16) :: ztemp
 
         P_J_Ion_amplitude = dcmplx(0.d0, 0.d0)
@@ -1141,29 +1074,41 @@ contains
 
                 do r = 1, orb_Q
                     do s = 1, orb_Q
-                        do tnn = 2, t_idx
-                            do tnp = tnn + 1, t_idx
-                                temp = fctP(:, r, tnn)
-                                temp2 = fctP(:, s, tnp)
-                                if (tnn .lt. t_idx) then
+                        do tnn = 2, t_idx-1
+                              temp = fctP(:, r, tnn)
+!   
                                     do nn = tnn, t_idx - 1
-                                        call gemv(Upp(nn,:,:), temp, tempr) !todo: a separer en 2lignes et pleins d'autres!!!
+                                        call gemv(Upp(nn,:,:), temp, tempr) 
                                         temp = tempr
                                     enddo
-                                endif
-                                if (tnp .lt. t_idx) then
+                        if(tnn.lt.(t_idx-1))then    !ajout du 27-03-2022                      
+                            do tnp = tnn + 1, t_idx-1
+  
+                                temp2 = fctP(:, s, tnp)
+ !   
                                     do nn = tnp, t_idx - 1
                                         call gemv(Upp(nn,:,:), temp2, tempr2)
                                         temp2 = tempr2
                                     enddo
-                                endif
+
                                 do j = 1, dimP
-                                    ztemp = matA(tnp) * matA(tnn) * conjg(temp(j)) * temp2(j) * Volkov_OM_mat(tnn, tnp, r, s) !  matA(tnp-1,tnp-1)*matA(tnn-1,tnn-1)  ????
+                                    ztemp = matA(tnp-1) * matA(tnn-1) * conjg(temp2(j)) * temp(j) * Volkov_OM_mat(tnp, tnn, r, s) !  matA(tnp-1,tnp-1)*matA(tnn-1,tnn-1)  ????
                                     P_J_Ion_amplitude(j) = P_J_Ion_amplitude(j)+(ztemp + conjg(ztemp))
                                 enddo
+
                             enddo
+                        endif  
+ !27-03-2022
+                               temp3 = fctP(:, s, tnn)
+ !   
+                                    do nn = tnn, t_idx - 1
+                                        call gemv(Upp(nn,:,:), temp3, tempr3) 
+                                        temp3 = tempr3
+                                    enddo
                             do j = 1, dimP
-                                P_J_Ion_amplitude(j) = P_J_Ion_amplitude(j) + matA(tnn) * matA(tnn) * conjg(temp(j)) * temp2(j) * muEPS_Sq(r, s)
+
+                                ztemp=matA(tnn-1) * matA(tnn-1) * conjg(temp(j)) * temp3(j) * muEPS_Sq(r, s)
+                                P_J_Ion_amplitude(j) = P_J_Ion_amplitude(j) + 0.5d0*(ztemp + conjg(ztemp))
                             enddo
                         enddo
                     enddo
@@ -1174,138 +1119,16 @@ contains
 
 
 
-    !***************************************************
-    !***************************************************
-    !***************************************************
-    subroutine Get_Observable_P_I2(Upp, fctP, muEPS_Sq, Volkov_OM_mat, matA, P_J_Ion_amplitude, t_idx)
-        !***************************************************
-        !***************************************************
-        complex(kind = comp_16), dimension(:,:,:), intent(in) :: fctP, Upp
-        Real(kind = real_8), Dimension(:), Intent(in) :: matA
-        complex(kind = comp_16), dimension(:,:,:,:), Intent(in) :: Volkov_OM_mat
-        Complex(kind = comp_16), Dimension(:,:), Intent(in) :: muEPS_Sq
-        Complex(kind = comp_16), Dimension(:) :: P_J_Ion_amplitude
-        Integer(kind = int_4), Intent(in) :: t_idx
-        Integer(kind = int_4) :: nn, r, s, tnn, tnp
-        Complex(kind = comp_16), Dimension(dimP) :: temp, temp2, tempr, tempr2!,ztemp 
-        Complex(kind = comp_16) :: ztemp
-
-        P_J_Ion_amplitude = dcmplx(0.d0, 0.d0)
-        if (t_idx .ge. 2) then
-
-
-            select case (t_idx)
-            case (2)
-
-                do r = 1, orb_Q
-                    do s = 1, orb_Q
-                        temp = fctP(:, r, t_idx)
-                        temp2 = fctP(:, s, t_idx)
-                        do j = 1, dimP
-                            P_J_Ion_amplitude(j) = P_J_Ion_amplitude(j) + matA(t_idx) * matA(t_idx) * conjg(temp(j)) * temp2(j) * muEPS_Sq(r, s)
-                        enddo
-                    enddo
-                enddo
-
-            case default
-
-                do r = 1, orb_Q
-                    do s = 1, orb_Q
-                        do tnn = 2, t_idx
-                            do tnp = tnn + 1, t_idx
-                                temp = fctP(:, r, tnn)
-                                temp2 = fctP(:, s, tnp)
-                                if (tnn .lt. t_idx) then
-                                    do nn = tnn, t_idx - 1
-                                        call gemv(Upp(nn,:,:), temp, tempr) !todo: a separer en 2lignes et pleins d'autres!!!
-                                        temp = tempr
-                                    enddo
-                                endif
-                                if (tnp .lt. t_idx) then
-                                    do nn = tnp, t_idx - 1
-                                        call gemv(Upp(nn,:,:), temp2, tempr2)
-                                        temp2 = tempr2
-                                    enddo
-                                endif
-                                do j = 1, dimP
-                                    ztemp = matA(tnp) * matA(tnn) * conjg(temp(j)) * temp2(j) * Volkov_OM_mat(tnn, tnp, r, s) !  matA(tnp-1,tnp-1)*matA(tnn-1,tnn-1)  ????
-                                    P_J_Ion_amplitude(j) = P_J_Ion_amplitude(j)+(ztemp + conjg(ztemp))
-                                enddo
-                            enddo
-                            do j = 1, dimP
-                                P_J_Ion_amplitude(j) = P_J_Ion_amplitude(j) + matA(tnn) * matA(tnn) * conjg(temp(j)) * temp2(j) * muEPS_Sq(r, s)
-                            enddo
-                        enddo
-                    enddo
-                enddo
-            end select
-        end if
-    end subroutine Get_Observable_P_I2
+ 
 
 
 
 
-
-    !***************************************************
-    !***************************************************
-    !***************************************************
-    subroutine Get_Observable_P_I_old(Upp, fctP, muEPS_Sq, Volkov_OM_mat, matA, P_J_Ion_amplitude, t_idx)
-        !***************************************************
-        !***************************************************dynamique_new.f90
-        complex(kind = comp_16), dimension(:,:,:), intent(in) :: fctP, Upp
-        Real(kind = real_8), Dimension(:), Intent(in) :: matA
-        complex(kind = comp_16), dimension(:,:,:,:), Intent(in) :: Volkov_OM_mat
-        Complex(kind = comp_16), Dimension(:,:), Intent(in) :: muEPS_Sq
-        Complex(kind = comp_16), Dimension(:) :: P_J_Ion_amplitude
-        Integer(kind = int_4), Intent(in) :: t_idx
-        Integer(kind = int_4) :: nn, r, s, tnn, tnp
-        Complex(kind = comp_16), Dimension(dimP) :: temp, temp2, tempr, tempr2
-        Complex(kind = comp_16) :: ztemp
-        P_J_Ion_amplitude = dcmplx(0.d0, 0.d0)
-        if (t_idx .ge. 2) then
-            do j = 1, dimP
-                write(*, *) j, "/", dimP, "( in Get_Observable_P_I)"
-                do r = 1, orb_Q
-                    do s = 1, orb_Q
-                        do tnn = 2, t_idx - 1
-                            do tnp = 1, tnn - 1
-                                if (tnn .lt. t_idx) then
-                                    temp = fctP(:, r, tnn)
-                                    temp2 = fctP(:, s, tnp)
-                                    write(*, *) "temp2 in Get_Observable_P_I : ", temp2
-                                    do nn = tnn, tn - 1
-                                        call gemv(Upp(nn,:,:), temp, tempr) !todo: a separer en 2 lignes et pleins d'autres!!!
-                                        write(*, *) "tempr in Get_Observable_P_I : ", tempr
-                                        temp = tempr
-                                    enddo
-                                    do nn = tnp, tn - 1
-                                        call gemv(Upp(nn,:,:), temp2, tempr2)
-                                        write(*, *) "Upp(n,:,:) in Get_Observable_P_I : ", Upp(nn,:,:)
-                                        write(*, *) "tempr2 in Get_Observable_P_I : ", tempr2
-                                        temp2 = tempr2
-                                    enddo
-                                endif
-                                write(*, *) "matA(tnp) in Get_Observable_P_I :", matA(tnp)
-                                write(*, *) "matA(tnn) in Get_Observable_P_I :", matA(tnn)
-                                write(*, *) "temp(j) in Get_Observable_P_I :", temp(j)
-                                write(*, *) "temp2(j) in Get_Observable_P_I :", temp2(j)
-                                write(*, *) "Volkov_OM_mat(tnn,tnp,r,s) in Get_Observable_P_I :", Volkov_OM_mat(tnn, tnp, r, s)
-                                ztemp = matA(tnp) * matA(tnn) * conjg(temp(j)) * temp2(j) * Volkov_OM_mat(tnn, tnp, r, s) !  matA(tnp-1,tnp-1)*matA(tnn-1,tnn-1)  ????
-                                write(*, *) "ztemp in Get_Observable_P_I :", ztemp
-                                P_J_Ion_amplitude(j) = P_J_Ion_amplitude(j)+(ztemp + conjg(ztemp))
-                            enddo
-                            P_J_Ion_amplitude(j) = P_J_Ion_amplitude(j) + matA(tnn) * matA(tnn) * conjg(temp(j)) * temp2(j) * muEPS_Sq(r, s)
-                        enddo
-                    enddo
-                enddo
-            enddo
-        endif
-    end subroutine Get_Observable_P_I_old
 
 
     !*******************************************
     !*******************************************
-    subroutine Get_Observable_eMomentum_map(kvec, fctP, Upp, ek_Amp, lcCG, muEPS, matA, eps, cEta, cZeta, lmn_vec, prim_center)!,matAlpha,matPhi
+    subroutine Get_Observable_eMomentum_map(kvec, fctP, Upp, ek_Amp, lcCG, muEPS, matA, eps, cEta, cZeta, lmn_vec, prim_center,t_n)!,matAlpha,matPhi
         !*******************************************
         !*******************************************
         complex(kind = comp_16), dimension(:,:,:), intent(in) :: fctP, Upp !Upp(nt,dimP,dimP)
@@ -1325,20 +1148,20 @@ contains
         complex(kind = comp_16), dimension(dimP), Intent(out) :: ek_Amp
         !complex(kind=comp_16), dimension(:,:,:,:)	   :: Volkov_OM_mat
         complex(kind = comp_16), dimension(dimP, orb_Q) :: temp, temp2
-        integer :: nn, j, r, s, tnn !,totPrimCount
+        integer :: nn, j, r, s, tnn, t_n !,totPrimCount
 
         allocate(gamm2(orb_Q))
 
         ek_Amp = dcmplx(0.d0, 0.d0)
 
-        if (tn .ge. 2)then
-            do tnn = 2, tn
+        if (t_n .ge. 2)then
+            do tnn = 2, t_n
 
-                call Get_Anl_Alpha_Phi(matA, tn, tnn, A_nl, Alpha_nl, Phi_nl)
-                call emomentum_from_MO(tn - tnn, A_nl, Alpha_nl, Phi_nl, eps, cZeta, lmn_vec, prim_center, lcCG, muEPS, kvec, gamm2)
+                call Get_Anl_Alpha_Phi(matA, t_n, tnn, A_nl, Alpha_nl, Phi_nl)
+                call emomentum_from_MO(t_n - tnn, A_nl, Alpha_nl, Phi_nl, eps, cZeta, lmn_vec, prim_center, lcCG, muEPS, kvec, gamm2)
                 temp = fctP(:,:, tnn)
-                if (tnn .lt. tn)then
-                    do nn = tnn, tn - 1
+                if (tnn .lt. t_n)then
+                    do nn = tnn, t_n - 1
                         call gemm(Upp(nn,:,:), temp, temp2) ! todo: a modifier
                         temp = temp2
                     end do
@@ -1367,8 +1190,8 @@ contains
         Integer(kind = int_4), dimension(:,:), Intent(in) :: lmn_vec
         Integer(kind = int_4), dimension(3) :: lmn_p
         Integer(kind = int_4), Intent(in) :: it
-        complex(kind = comp_16), dimension(totPrimCount) :: BigGamma1, BigGamma2
-
+        complex(kind = comp_16), dimension(totPrimCount) :: BigGamma1,BigGamma2
+        complex(kind = comp_16) ::   BigGamma1_temp
         complex(kind = comp_16), dimension(orb_Q), Intent(out) :: gamm_res
 
         complex(kind = comp_16), dimension(orb_Q) :: temp1, temp2, temp
@@ -1378,12 +1201,13 @@ contains
 
         BigGamma1 = dcmplx(0.d0, 0.d0)
         BigGamma2 = dcmplx(0.d0, 0.d0)
-
+        BigGamma1_temp = dcmplx(0.d0, 0.d0)
         do i_prim = 1, totPrimCount
             !write(*,*) i_prim,"/",totPrimCount, "( in emomentum_from_MO)"
 
-            lmn_p = lmn_vec(i_prim,:)
+     !             lmn_p = lmn_vec(i_prim,:)
             do j = 1, 3
+           lmn_p = lmn_vec(i_prim,:)
                 !write(*,*) j,"/3 (j in emomentum_from_MO)"
                 select case(j)
                 case(1)
@@ -1395,16 +1219,15 @@ contains
                 end select
 
                 !write(*,*) "call of uvolkov_on_CG ( in emomentum_from_MO)"
-                call uvolkov_on_CG(Anl, Alpha_nl, Phi_nl, cZeta(i_prim), lmn_p, prim_center(i_prim,:), eps, kvec, it, BigGamma1(i_prim))
-                BigGamma1(i_prim) = eps(j) * BigGamma1(i_prim)/dsqrt(4.d0 * cZeta(i_prim))
-                !write(*,*) "eps(j)", eps(j)
-                !write(*,*) "BigGamma1(i_prim)", BigGamma1(i_prim)
+                call uvolkov_on_CG(Anl, Alpha_nl, Phi_nl, cZeta(i_prim), lmn_p, prim_center(i_prim,:), eps, kvec, it, BigGamma1_temp)
+                BigGamma1(i_prim) = BigGamma1(i_prim)+eps(j) * BigGamma1_temp! 
+  
             enddo
+            BigGamma1(i_prim) = BigGamma1(i_prim)/dsqrt(4.d0 * cZeta(i_prim))
 
             call uvolkov_on_CG(Anl, Alpha_nl, Phi_nl, cZeta(i_prim), lmn_vec(i_prim,:), prim_center(i_prim,:), eps, kvec, it, BigGamma2(i_prim))
 
-            BigGamma1(i_prim) = BigGamma1(i_prim) + dot_product(eps, prim_center(i_prim,:)) * BigGamma2(i_prim)
-
+              BigGamma1(i_prim) = BigGamma1(i_prim) + dot_product(eps, prim_center(i_prim,:)) * BigGamma2(i_prim)
         enddo
 
         call gemv(lcCG, BigGamma1, temp1)
@@ -1439,17 +1262,17 @@ contains
         res = dcmplx(1.d0, 0.d0)
         do i = 1, 3
             !write(*,*) i,"/3 (i in uvolkov_on_CG)"
-            Atemp = Anl * eps(i)
-            Alpha_temp = Alpha_nl * eps(i)
+            Atemp =  Anl * eps(i)
+            Alpha_temp =  Alpha_nl * eps(i)
             k_transl = veck(i) - Atemp
             R_transl = Rc(i) + Alpha_temp
 
             n = lmn(i)
 
             !write(*,*) 'before calc of res'
-            res = res * Hermite(k_transl/dsqrt(4.d0 * zet), n) * cdexp(-k_transl * k_transl * (dcmplx(1.d0/(4.d0 * zet), -Dtime * pdt/2.d0)))
+            res = res * Hermite(k_transl/dsqrt(4.d0 * zet), n) * cdexp(-k_transl * k_transl * (dcmplx(1.d0/(4.d0 * zet), -Dtime  *pdt/2.d0)))
             !write(*,*) 'before calc of res second line'
-            res = res * cdexp(dcmplx(0.d0, R_transl * k_transl))
+            res = res * cdexp( R_transl * k_transl*dcmplx(0.d0, -1.d0) )
             nn = nn + n
             !write(*,*) 'end of loop on uvolkov_on_CG'
         enddo
@@ -1460,7 +1283,7 @@ contains
 
 
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    function Hermite(kk, n)
+    function Hermite(kk, n)    ! A revoir source (????)
         ! Hermite polynomials
 
         ! Stops at n = 10 
@@ -1491,7 +1314,7 @@ contains
 
     !*******************************************
     !*******************************************
-    Subroutine Hermite_Coeff(n, A)
+    Subroutine Hermite_Coeff(n, A)    ! A revoir source (????)
         !*******************************************
         !******************************************* 
         integer i, j, n
@@ -1499,6 +1322,9 @@ contains
         real(kind = real_8), dimension(0:10, 0:10) :: B
         !write(*,*) "Begining of Hermite_Coeff"
         !Establish l0 and l1 coefficients
+
+         B=0.d0 !initialisation ajoutée
+
         B(0, 0) = 1.d0; B(1, 0) = 0.d0; B(1, 1) = 2.d0
         !Return if order is less than two
         if (n > 1) then
@@ -1510,10 +1336,11 @@ contains
                     B(i, j) = 2.d0 * B(i - 1, j - 1) - 2.d0 * (i - 1) * B(i - 2, j)
                 end do
             end do
+        end if
             do i = 0, n
                 A(i) = B(n, i)
             end do
-        end if
+ !       end if ! déplacé pour engendrer A pour n=1
 
     end Subroutine Hermite_Coeff
 

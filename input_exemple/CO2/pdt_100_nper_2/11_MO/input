@@ -1,0 +1,46 @@
+&grille
+basis_file='CO2_eq'
+nq= 1
+inR= 1
+job= 'CO2_devTests'
+QCsoft=0
+/
+&planewaves
+nx= 601			  !Number of points for the X axis in both the spacial and momentum spaces
+xmin= -150		!Minimal value in the X axis
+ny= 1			    !Number of points for the Y axis in both the spacial and momentum spaces
+ymin=  -100		  !Minimal value in the Y axis
+nz= 601			  !Number of points for the Z axis in both the spacial and momentum spaces
+zmin= -150		!Minimal value in the Z axis
+/
+&drt
+Ne= 22			  !Number of electrons
+Norb_cat= 11		!Number of active orbitals(in the Q_0 subspace)
+Norb_sym= 1		      !Number of symbolic orbitals(for ionisation)
+FC= 0			          !Number of frozen cores
+S= 0.d0			        !Total spin of the system
+restriction=.TRUE.	!Restrict to single ionisation
+/
+&champ
+E0=3.774256780481986E-002 		!Laser intensity(a.u.) 5E13
+omega=5.695409499943046E-002		!Laser frequency(a.u.) 800 nm = 0.057  2.1 micon = 2.1696798095021126E-002
+delta= 1.5E+000		!Laser phase(units of pi)
+theta= 0.5d0	!Angle from the Z axis to polarisation(units of pi)
+phy= 0.0d0		!Angle between sin(theta) and the X axis(units of pi)
+pulsed= .TRUE.		!The form of the pulse
+nper=2			!Number of optic cycles
+pdt= 100		!Number of timesteps per optic cycle 
+tmin=0.d0		!Initial time
+harmonic=1
+/
+&matrix_reordering_dim
+reorder_size=27
+/
+&prim_spec
+lp=3,1,2
+ld=1,2,3,4,5,6
+/
+&control_flags
+Iflg1=1
+Iflg2=1
+/
