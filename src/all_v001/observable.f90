@@ -141,7 +141,6 @@ Real(kind=real_8),Dimension(dimP)			::fctStateInt
 integer(kind=int_4)					::i,j,k,tn
 
 open(52,file='Pop_State.dat',status='unknown',form='formatted',position='append')
-
 fctStateInt=0.d0
 
 do j=1,dimP
