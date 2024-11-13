@@ -75,7 +75,7 @@ contains
         Real(kind = real_8) :: PropStart, PropEnd, TotalProp
         Real(kind = real_8) :: TotalCI, TotalGamma, TotalVolk
         Real(kind = real_8), Dimension(3) :: sauvkmin
-        Real(kind = real_8) :: t1, t2Thanh-Tung.Nguyen-Dang@chm.ulaval.ca
+        Real(kind = real_8) :: t1, t2
         Character(len = 5) :: nom
         
         allocate(UqqMO(norb_rot,norb_rot))
@@ -122,7 +122,7 @@ contains
         DO j=1,dimQ
           WRITE(nom,'(I5.5)') j
           OPEN(1000+j,file='Proba_canal_Q'//ADJUSTL(nom)//'.dat',STATUS='replace',FORM='formatted')
-        ENDDOThanh-Tung.Nguyen-Dang@chm.ulaval.ca
+        ENDDO
 
 
         allocate(Volkov_OM_mat(nt, nt, orb_Q, orb_Q)) !JN
