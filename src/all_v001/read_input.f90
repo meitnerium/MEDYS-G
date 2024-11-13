@@ -8,7 +8,7 @@ use basics
 contains
 !****************************************************************************************
 !****************************************************************************************
- subroutine param_debut(basis_file,nq,inR,Ne,Norb_cat,Norb_sym,FC,restriction,S,job,ni,imin,imax,di,dki,kmin,E0&
+ subroutine param_debut(basis_file,nq,inR,Ne,Norb_cat,Norb_sym,FC,norb_rot,restriction,S,job,ni,imin,imax,di,dki,kmin,E0&
 ,omega,delta,theta,phy,pulsed,nper,pdt,tmin,nt,QCsoft,lp,ld,Iflg1,Iflg2)
 !****************************************************************************************
 !****************************************************************************************
@@ -18,7 +18,7 @@ implicit none
 ! Parameters that are read
  Character(len=32), Intent(out) 	              :: basis_file,job
  Integer(kind=int_4), Intent(out) 	            :: nq, inR
- Integer(kind=int_4), Intent(out) 	            :: Ne,Norb_cat,Norb_sym,FC !,opt_GS
+ Integer(kind=int_4), Intent(out) 	            :: Ne,Norb_cat,norb_rot,Norb_sym,FC !,opt_GS
  Integer(kind=int_4), Intent(out)	              :: nper,nt
  Integer(kind=int_4),dimension(3), Intent(out)	              :: lp
  Integer(kind=int_4),dimension(6), Intent(out)	              :: ld
@@ -42,7 +42,7 @@ implicit none
 
 Namelist/grille/basis_file,nq,inR,job,QCsoft
  Namelist/planewaves/nx,xmin,ny,ymin,nz,zmin 
-Namelist/drt/Ne,Norb_cat,Norb_sym,FC,S,restriction
+Namelist/drt/Ne,Norb_cat,Norb_sym,FC,norb_rot,S,restriction ! norb_rot added 11-10-24
 Namelist/champ/E0,omega,delta,theta,phy,pulsed,nper,pdt,tmin,harmonic
 Namelist/prim_spec/lp,ld
 Namelist/control_flags/Iflg1,Iflg2

@@ -18,8 +18,15 @@ contains
 
     !****************************************************************************************
     !****************************************************************************************
-    subroutine new_dyna(fctQ, fctP, Upp, muEPS, muEPS_Sq, sauvChamp, matA, eps, cEta, cZeta, &
-        lmn_vec, prim_center, lcCG, Ers, H0qq, H0pp, MUqq, MUpp) ! ,matAlpha,matPhi
+    subroutine new_dyna(fctQ, fctP, Upp, muEPS,muEPS_temp2,hA_temp2, muEPS_Sq, sauvChamp, matA, eps, cEta, cZeta, &
+        lmn_vec, prim_center, lcCG,lcCG_temp, Ers, H0qq, H0pp, MUqq, MUpp,mo_R_mat,Vee) 
+        
+     !! 14-10-24
+!   (fctQ,fctP,Upp,muEPS,muEPS_temp2,hA_temp2,muEPS_Sq,sauvChamp,matA,eps,cEta,cZeta,&
+!   lmn_vec,prim_center,lcCG,lcCG_temp,Ers,H0qq,H0pp,MUqq,MUpp,mo_R_mat) !,matAlpha,matPhi  !!! 9-10-24: mo_R_mat, lcCG will be inout in new_dyna. lcCG_temp is in, as are mu_EPS_temp, hA_temp
+     
+     !!   
+        ! ,matAlpha,matPhi
         !Actual electron dynamics calculations:  Many-electron wavepacket in TDCI form, 
         ! Full Gaussian version 
         !INPUT: 
@@ -31,14 +38,16 @@ contains
         !****************************************************************************************
         !Real(kind=real_8),Intent(in)				::theta,phy,delta
         Complex(kind = comp_16), Dimension(:), Intent(inout) :: fctQ
-        Complex(kind = comp_16), Dimension(:,:,:), Intent(inout) :: fctP, Upp
-        Complex(kind = comp_16), Dimension(:,:), Intent(in) :: muEPS
+        Complex(kind = comp_16), Dimension(:,:,:), Intent(inout) :: fctP, Upp, lcCG   !lcCG is  complex and is inout
+   !    Complex(kind = comp_16), Dimension(:,:), Intent(in) :: muEPS !!!! remplace par ligne suivante 14-10-2024
+        Complex(kind=comp_16),  Dimension(:,:), Intent(in) 	:: muEPS,mo_R_mat,muEPS_temp2,hA_temp2 !modifie 9-10-2024
+!!!! 
         Complex(kind = comp_16), Dimension(:,:), Intent(inout) :: muEPS_Sq
 
         Real(kind = real_8), Dimension(:), Intent(inout) :: matA
         ! Real(kind=real_8),dimension(:,:),Intent(inout):: matAlpha, matPhi
 
-        Real(kind = real_8), dimension(:,:), Intent(in) :: cEta, lcCG, prim_center
+        Real(kind = real_8), dimension(:,:), Intent(in) :: cEta, lcCG_temp, prim_center !!!! remplace lcCG par lcCG_temp 14-10-2024
         Real(kind = real_8), dimension(:), Intent(inout) :: cZeta, eps, sauvChamp
         !Integer(kind=int_4),allocatable,dimension(:,:),Intent(in)::prim_lmn
         Integer(kind = int_4), dimension(:,:), Intent(in) :: lmn_vec
@@ -55,16 +64,21 @@ contains
         Real(kind = real_8), Dimension(:,:), Intent(in) :: H0qq
         !Real(kind=real_8),Dimension(:,:)			::MUqqne
         Real(kind = real_8), Dimension(:,:), Intent(in) :: H0pp, MUpp, MUqq
+        ! 16-10-24
+        Real(kind=real_8), Dimension(:,:,:,:), Intent(in) 	:: vee 
         !Real(kind=real_8),Dimension(3)	,Intent(in)			::eps
 
         complex(kind = comp_16), allocatable, dimension(:,:,:,:) :: Volkov_OM_mat
+         complex(kind = comp_16), allocatable, dimension(:,:) :: UqqMO
 
         Real(kind = real_8) :: PreStart, PreEnd, TotalPre
         Real(kind = real_8) :: PropStart, PropEnd, TotalProp
         Real(kind = real_8) :: TotalCI, TotalGamma, TotalVolk
         Real(kind = real_8), Dimension(3) :: sauvkmin
-        Real(kind = real_8) :: t1, t2
+        Real(kind = real_8) :: t1, t2Thanh-Tung.Nguyen-Dang@chm.ulaval.ca
         Character(len = 5) :: nom
+        
+        allocate(UqqMO(norb_rot,norb_rot))
         write(*, *) 'Debut dynamique'
 
         sauvChamp = 0.d0
@@ -76,8 +90,18 @@ contains
         !////////////////////////////////////////////////////////
         ! start loop over time variable (tn), i.e. TIME-PROPAGATION
         !////////////////////////////////////////////////////////
+        
+        ! initialisation
+        
         matA=0.d0
-        call Volkov_OM(1, 1, lcCG, matA, eps, cEta, cZeta, lmn_vec, prim_center, muEPS, muEPS_Sq)!,matAlpha,matPhi ! Volkov_OM called at the start, to calculate matrix elements of the type 
+        UqqMO=dcmplx(1.d0,0.d0)
+        
+        !
+        
+        do tn = 1, nt ! begin time-loop
+            t = tn
+            call cpu_time(t2)
+        call Volkov_OM(tn, tn, lcCG, matA, eps, cEta, cZeta, lmn_vec, prim_center, muEPS, muEPS_Sq)!,matAlpha,matPhi ! Volkov_OM called at the start, to calculate matrix elements of the type 
         write(*, *) "----------------------------------"            !   <r|d(1-q)d|s> = <r|d(1-q)u_volk(0) (1-q)d|s>
         write(*, *) "muEPS_Sq in new_dyna (at begining)"
         write(*, *) muEPS_Sq
@@ -98,14 +122,14 @@ contains
         DO j=1,dimQ
           WRITE(nom,'(I5.5)') j
           OPEN(1000+j,file='Proba_canal_Q'//ADJUSTL(nom)//'.dat',STATUS='replace',FORM='formatted')
-        ENDDO
+        ENDDOThanh-Tung.Nguyen-Dang@chm.ulaval.ca
 
 
         allocate(Volkov_OM_mat(nt, nt, orb_Q, orb_Q)) !JN
         Volkov_OM_mat = dcmplx(0.d0, 0.d0)
 
-        do tn = 1, nt ! begin time-loop
-            t = tn
+ !       do tn = 1, nt ! begin time-loop
+ !           t = tn
             call cpu_time(t2)
     !        write ( *, *) 'tn = ', tn, 'Elapsed CPU time = ', t2 - t1
  
@@ -115,13 +139,13 @@ contains
             matA(tn) = Int0()
 
  
-            call new_propagation(fctQ, fctP, Upp, muEPS, muEPS_Sq, H0qq, H0pp, MUqq, MUpp, Mat33, Inv33, &
-            matA, eps, cEta, cZeta, lmn_vec, prim_center, lcCG, Ers, Volkov_OM_mat) ! ,matAlpha,matPhi
+            call new_propagation(fctQ, fctP, Upp, muEPS, muEPS_Sq, muEPS_temp2,hA_temp2, H0qq, H0pp, MUqq, MUpp, Mat33, Inv33, &
+            matA, eps, cEta, cZeta, lmn_vec, prim_center, lcCG, lcCG_temp,  Ers, Volkov_OM_mat,mo_R_mat,Vee,UqqMO) ! ,matAlpha,matPhi !!! ajout de mo_R_mat 14-10-2024
 
             sauvChamp(tn + 1) = champNint()
             ! 
             write(51, *) tmin + (tn * pdt), Int0(), sauvChamp(tn + 1)
-        end do ! end of time-loop
+        end do ! end of time-loopThanh-Tung.Nguyen-Dang@chm.ulaval.ca
 
         do j = 1, dimP
             close(900 + j)
@@ -279,33 +303,41 @@ contains
 
     !****************************************************************************************
     !****************************************************************************************
-    subroutine new_propagation(fctQ, fctP, Upp, muEPS, muEPS_Sq, H0qq, H0pp, MUqq, MUpp, Mat33, Inv33, &
-        matA, eps, cEta, cZeta, lmn_vec, prim_center, lcCG, Ers, Volkov_OM_mat) ! ,matAlpha,matPhi
+    subroutine new_propagation(fctQ, fctP, Upp, muEPS, muEPS_Sq, muEPS_temp2,hA_temp2, H0qq, H0pp, MUqq, MUpp, Mat33, Inv33, &
+        matA, eps, cEta, cZeta, lmn_vec, prim_center, lcCG, lcCG_temp,  Ers, Volkov_OM_mat,mo_R_mat,Vee,UqqMO) ! ,matAlpha,matPhi
         !
         !
         !****************************************************************************************
         !****************************************************************************************
         complex(kind = comp_16), dimension(:,:), intent(in) :: Mat33, Inv33
         real(kind = real_8), dimension(:,:), intent(in) :: H0qq, H0pp, MUqq, Mupp
-
+! 16-10-24
+        Real(kind=real_8), Dimension(:,:,:,:), Intent(in) 	:: vee 
+        Complex(kind=comp_16), allocatable, dimension(:,:,:,:) :: vee2t
+        real(kind = real_8), allocatable, dimension(:,:)  ::   MUqq_loc, Mupp_loc
         !real(kind=real_8),intent(in)			           ::theta,phy,delta
         !Integer(kind=int_4),Intent(in)		               ::opt_GS
         complex(kind = comp_16), dimension(:), intent(inout) :: fctQ
-        complex(kind = comp_16), dimension(:,:,:), intent(inout) :: fctP, Upp
+  !      complex(kind = comp_16), dimension(:,:,:), intent(inout) :: fctP, Upp
+        Complex(kind = comp_16), Dimension(:,:,:), Intent(inout) :: fctP, Upp, lcCG   !lcCG is  complex and is inout
         complex(kind = comp_16), allocatable, dimension(:,:) :: Upp_loc
-        Complex(kind = comp_16), Dimension(:,:), Intent(in) :: muEPS, muEPS_Sq
+ !       Complex(kind = comp_16), Dimension(:,:), Intent(in) :: muEPS, muEPS_Sq  !!!! remplace par (14-10-2024)
+        Complex(kind=comp_16),  Dimension(:,:), Intent(in) 	:: muEPS,mo_R_mat !modifie 14-10-2024
+        Complex(kind=comp_16),  Dimension(:,:)	::  muEPS_temp,hA_temp,muEPS_temp2, hA_temp2,hA
+        Complex(kind = comp_16), Dimension(:,:), Intent(inout) :: muEPS_Sq, UqqMO    
 
         Real(kind = real_8), Dimension(:), Intent(inout) :: matA
         ! Real(kind=real_8), dimension(:,:),Intent(inout):: matAlpha, matPhi
 
-        Real(kind = real_8), dimension(:,:), Intent(in) :: cEta, lcCG, prim_center
+  !      Real(kind = real_8), dimension(:,:), Intent(in) :: cEta, lcCG, prim_center
+               Real(kind = real_8), dimension(:,:), Intent(in) :: cEta, lcCG_temp, prim_center !!!! remplace lcCG par lcCG_temp 14-10-2024
         Real(kind = real_8), dimension(:), Intent(in) :: cZeta, eps
         !Integer(kind=int_4),allocatable,dimension(:,:),Intent(in)::prim_lmn
         Integer(kind = int_4), dimension(:,:), Intent(in) :: lmn_vec
         Real(kind = real_8), Dimension(:,:,:,:), Intent(in) :: Ers
 
         complex(kind = comp_16), allocatable, dimension(:) :: CI1, CI2, CI3, CI4, CI5, CI,CI3_P
-        complex(kind = comp_16), allocatable, dimension(:,:) :: muEPS_r_gam, Uqq, gamm2!,gammCorrection
+        complex(kind = comp_16), allocatable, dimension(:,:) :: muEPS_r_gam, Uqq,  UqqMO_t, gamm2 !, mo_R_mat_tn!,gammCorrection
         !complex(kind=comp_16),allocatable,dimension(:,:,:)   ::Upp
         complex(kind = comp_16), dimension(:,:,:,:) :: Volkov_OM_mat
 
@@ -322,14 +354,40 @@ contains
         !    Character(len=23)                   ::canal
         !    CHARACTER(LEN=20) :: FMT
 
-        allocate(Uqq(dimQ, dimQ))!,Upp(nt,dimP,dimP)) déjà dimensioné au main
+        allocate(Uqq(dimQ, dimQ), UqqMO_t(norb_rot,norb_rot))!,Upp(nt,dimP,dimP)) déjà dimensioné au main
         Uqq = dcmplx(0.d0, 0.d0)
         allocate(Upp_loc(dimP, dimP))
-        Upp_loc = dcmplx(0.d0, 0.d0)
-        call Udiag(H0qq, MUqq, dimQ, Uqq, delta)
-        call Udiag(H0pp, MUpp, dimP, Upp_loc, delta)
+        allocate(MUqq_loc(dimQ,dimQ), Mupp_loc(dimP,dimP))
+        allocate(vee2t(orb_Q,orb_Q,orb_Q,orb_Q))
+ !  P-space bound-state dynamics here is TDCI .Switch to  TDMCSCF also !!!!  16-10-2024     
+ !       Upp_loc = dcmplx(0.d0, 0.d0)
+ !       call Udiag(H0pp, MUpp, dimP, Upp_loc, delta)
+ !       Upp(tn,:,:) = Upp_loc
+  
+  !  In TDMCSCF,bound  CSF mixing in both Q and P subspaces is due to vee(t)      
+        call vee_moTOmo(vee,mo_R_mat,norb_lect,orb_Q,vee2t)
+        call Hd_CSF(hA,hA,vee2t,Ers,Ersmp,H0qq,H0pp,MUqq_loc,MUpp_loc) 
+        call Udiag(H0qq, MUqq_loc, dimQ, Uqq, delta)
+        call Udiag(H0pp, MUpp_loc, dimP, Upp_loc, delta)
         Upp(tn,:,:) = Upp_loc
-        deallocate(Upp_loc)
+        
+  ! bound orbital rotations  
+      
+         call Udiag(hA_temp2, muEPS_temp2, norb_rot, UqqMO_t, delta)
+         UqqMO=matmul(UqqMO_t,UqqMO)
+         do i=1,orb_Q
+           do j=1,norb_rot
+           mo_R_mat(i,j)=UqqMO(i,j)
+           end do
+        enddo 
+        
+  ! lcCG of rotated (time-dependent) MOs
+  
+  lcCG(:,:,tn)=matmul(mo_R_mat,lcCG_temp)    
+  
+  !!!!  
+   
+        deallocate(Upp_loc, MUqq_loc, MUpp_loc)
         !!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         !allocate(Volkov_OM_mat(nt,nt,orb_Q,orb_Q), muEPS_r_gam(orb_Q,dimP)) ! Volkov_OM_mat now allocated and initialized in new_dyna
@@ -361,22 +419,8 @@ contains
         call gemv(Mat33, CI3, CI4) !Etape4
         CI5 = CI4  - (dcmplx(0.d0, 1.d0) * CI2) !Etape5
         call gemv(Uqq, CI5, CI) !Etape6F
-        if(tn.le.100)then
-        write(*,*) "...........................tn=", tn, ".........................................."
-        write(*,*) "testing norm conservation- part 1"
-        write(*,*) "|CI4|^2-|fctQ|^2=", dot_product( CI4,CI4)-dot_product(fctQ,fctQ)
-          CI3_P=4.d0*matmul(Mat33-ZidentiMAT(dimQ),CI3)
-        write(*,*) "compared to CI3.Hqqp*CI3=", dot_product( CI3,CI3_P)
-        write(*,*) "|CI1|^2=", dot_product( CI1,CI1)
-      ! write(*, *) "        ------------------------------       "
-        write(*,*) "testing norm conservation- part 2"
-        write(*,*) "|CI2|^2=", dot_product( CI2,CI2)
-        CI3_P= matmul( ZidentiMAT(dimQ)-Mat33,CI2)
-        write(*, *) "compared to dot_product(CI2,Hqqp*CI2)-dot_product(CI1,CI2)=", dot_product(CI2,CI3_P)-dot_product(CI1,CI2)
-        write(*, *) "norm of Q-part (squared)=", dot_product(CI,CI), dot_product(CI5,CI5)
- !       write(*, *) "expected norm of P-part (squared)=", dot_product(CI,CI)
-        endif
-        fctQ = CI !propagation of Q-part of wp done
+        
+        fctQ = CI !CI propagation of Q-part of wp done
 
         sumfctQ = 0.d0
         do j = 1, dimQ
@@ -771,14 +815,15 @@ contains
         Real(kind = real_8), Dimension(:), Intent(inout) :: matA
         ! Real(kind=real_8), dimension(:,:),Intent(inout):: matAlpha, matPhi
 
-        Real(kind = real_8), dimension(:,:), Intent(in) :: cEta, lcCG, prim_center
+        Real(kind = real_8), dimension(:,:), Intent(in) :: cEta, prim_center
+        Complex(kind = comp_16), Dimension(:,:,:), Intent(in) :: lcCG
         Real(kind = real_8), dimension(:), Intent(in) :: cZeta, eps
         !Integer(kind=int_4),allocatable,dimension(:,:),Intent(in)::prim_lmn
         Integer(kind = int_4), dimension(:,:), Intent(in) :: lmn_vec
         complex(kind = comp_16), dimension(:,:), Intent(out) :: Volkov_OM_mat_res
         complex(kind = comp_16), dimension(:,:), allocatable :: localVolkov_OM_mat
         complex(kind = comp_16), allocatable, dimension(:,:,:,:) :: GMutG
-        Complex(kind = comp_16), Dimension(:,:), Intent(in) :: muEPS
+        Complex(kind = comp_16), Dimension(:,:) :: muEPS
         !Complex(kind=comp_16), Dimension(: ) 	:: temp
         Complex(kind = comp_16), allocatable, Dimension(:,:) :: temp, temp2, temp3!,GMutG
 
@@ -794,11 +839,11 @@ contains
         call Get_GMutG(t_n, t_nn, matA, eps, cEta, cZeta, lmn_vec, prim_center, GMutG)! ,matAlpha,matPhi
 
         !todo : src/all_v001/dynamique_new.f90(633): error #6284: There is no matching specific function for this generic function reference.   [GEMM]
-        temp = matmul(lcCG, GMutG(:,:, 1, 1)) !! for <G1|d (U_volkov) d |G2>
-        temp2 = matmul(temp, transpose(lcCG))
+        temp = matmul(conjg(lcCG(:,:,t_n), GMutG(:,:, 1, 1))) !! for <G1|d (U_volkov) d |G2>
+        temp2 = matmul(temp, transpose(lcCG(:,:,t_nn)))
 
-        temp = matmul(lcCG, GMutG(:,:, 0, 1)) !! for <G1|d^0 (U_volkov) d |G2>
-        temp3 = matmul(temp, transpose(lcCG))
+        temp = matmul(conjg(lcCG(:,:,t_n), GMutG(:,:, 0, 1))) !! for <G1|d^0 (U_volkov) d |G2>
+        temp3 = matmul(temp, transpose(lcCG(:,:,t_nn)))
 
         temp = matmul(muEPS, temp3)
         localVolkov_OM_mat = temp2 - temp  !- conjg(transpose(temp))
@@ -811,16 +856,16 @@ contains
 
 !
 !
-        temp = matmul(lcCG, GMutG(:,:, 1, 0)) !! for <G1|d^0 (U_volkov) d |G2>
-        temp3 = matmul(temp, transpose(lcCG))
+        temp = matmul(conjg(lcCG(:,:,t_n), GMutG(:,:, 1, 0))) !! for <G1|d^0 (U_volkov) d |G2>
+        temp3 = matmul(temp, transpose(lcCG(:,:,t_nn)))
         temp = matmul(temp3,muEPS)
         localVolkov_OM_mat =localVolkov_OM_mat -temp
 
    ! 
 
 !
-        temp = matmul(lcCG, GMutG(:,:, 0, 0)) !! for <G1|d^0 (U_volkov) d^0  |G2>
-        temp3 = matmul(temp, transpose(lcCG))
+        temp = matmul(conjg(lcCG(:,:,t_n), GMutG(:,:, 0, 0))) !! for <G1|d^0 (U_volkov) d^0  |G2>
+        temp3 = matmul(temp, transpose(lcCG(:,:,t_nn)))
         temp2 = matmul(muEPS, temp3)
         Volkov_OM_mat_res = localVolkov_OM_mat + matmul(temp2, muEPS)
 
